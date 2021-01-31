@@ -1,0 +1,7 @@
+{
+  "name": "drop.nifti.es",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
