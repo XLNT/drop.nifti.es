@@ -14,9 +14,18 @@
     }
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.2.1",
+    "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
+    "dotenv": "^8.2.0",
+    "framer-motion": "^3.2.2-rc.1",
+    "jsonwebtoken": "^8.5.1",
     "next": "10.0.6",
+    "next-compose-plugins": "^2.2.1",
     "react": "17.0.1",
     "react-dom": "17.0.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.0"
+  }
 }

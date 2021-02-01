@@ -1,12 +1,13 @@
-import { ethers } from "hardhat";
 import { expect } from 'chai';
-import type { Stickers } from "../typechain/Stickers";
-import type { Signer, Wallet } from "ethers";
+import type { Signer, Wallet } from 'ethers';
+import { ethers } from 'hardhat';
 
-const uri = "https://drop.nifti.es/metadata/{tokenId}"
-const data = '0x'
+import type { Stickers } from '../typechain/Stickers';
 
-describe("Stickers", function() {
+const uri = 'https://drop.nifti.es/metadata/{tokenId}';
+const data = '0x';
+
+describe('Stickers', function () {
   let stickers: Stickers;
   let signer: Signer;
   let signerAddress: string;
@@ -15,8 +16,8 @@ describe("Stickers", function() {
     signer = (await ethers.getSigners())[0];
     signerAddress = await signer.getAddress();
 
-    const Stickers = await ethers.getContractFactory("Stickers");
-    stickers = await Stickers.deploy(uri) as Stickers;
+    const Stickers = await ethers.getContractFactory('Stickers');
+    stickers = (await Stickers.deploy(uri)) as Stickers;
   });
 
   it('should have configured admin', async function () {
@@ -40,5 +41,4 @@ describe("Stickers", function() {
   it('should not be able to mint from deployer', async function () {
     await expect(stickers.mint('0x0', 0, 1, data)).to.be.reverted;
   });
-
 });
