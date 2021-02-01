@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "hardhat node"
+    "dev": "yarn hardhat node",
+    "test": "yarn hardhat test"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",
@@ -19,9 +23,6 @@
     "hardhat-typechain": "^0.3.4",
     "ts-generator": "^0.1.1",
     "typechain": "^4.0.1"
-  },
-  "dependencies": {
-    "dotenv": "^8.2.0"
   },
   "workspaces": {
     "nohoist": [
