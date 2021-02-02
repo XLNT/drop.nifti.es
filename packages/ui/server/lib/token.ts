@@ -1,5 +1,11 @@
 import { verify } from 'jsonwebtoken';
 
-export function verifyToken(token: string, signer) {
-  return verify(token, process.env.JWT_SECRET);
+export const AUDIENCE = 'drop.nifti.es';
+
+// verify that the token is from a specific publicKey, and for us
+export function verifyToken(token: string, publicKey: string | Buffer) {
+  return verify(token, publicKey, {
+    algorithms: ['ES256'],
+    audience: AUDIENCE,
+  });
 }
