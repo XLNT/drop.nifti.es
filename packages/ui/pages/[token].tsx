@@ -58,7 +58,10 @@ export default function Drop() {
 
   useEffect(() => {
     if (!connector) return;
-    if (connector.connected) return;
+    if (connector.connected) {
+      setAddress(connector.accounts[0]);
+      return;
+    }
 
     connector.on('connect', (error, payload) => {
       if (error) return setError(error);
@@ -167,5 +170,9 @@ export default function Drop() {
     );
   }
 
-  return <Button onClick={createSession}>Wallet Connect</Button>;
+  return (
+    <Button onClick={createSession} isLoading={!connector}>
+      Wallet Connect
+    </Button>
+  );
 }

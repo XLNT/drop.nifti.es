@@ -1,5 +1,7 @@
 import { extendTheme, ThemeOverride } from '@chakra-ui/react';
 
+const highlightable = { _selection: { backgroundColor: 'highlight' } };
+
 const override: ThemeOverride = {
   fonts: {
     body: "'DM Sans', sans-serif",
@@ -27,8 +29,11 @@ const override: ThemeOverride = {
     bruise: '#010024',
     tomato: '#FF3333',
     blackout: '#000000',
-    highlight: '#0500FF',
+    highlight: '#FF00FF',
     // success: '#00B733',
+  },
+  textStyles: {
+    highlightable,
   },
   styles: {
     global: {
@@ -36,6 +41,40 @@ const override: ThemeOverride = {
         fontFamily: 'body',
         color: 'bruise',
         bg: 'drywall',
+        overflowX: 'hidden',
+        lineHeight: 'normal',
+      },
+      '.particle': {
+        pointerEvents: 'none',
+        position: 'absolute',
+        willChange: 'transform',
+      },
+      sup: {
+        ...highlightable,
+      },
+      li: {
+        ...highlightable,
+      },
+    },
+  },
+  components: {
+    Heading: {
+      baseStyle: {
+        ...highlightable,
+      },
+    },
+    Link: {
+      baseStyle: {
+        textDecoration: 'underline',
+        _hover: { color: 'concrete' },
+        ...highlightable,
+      },
+    },
+    Code: {
+      baseStyle: {
+        backgroundColor: 'smudge',
+        borderRadius: 4,
+        ...highlightable,
       },
     },
   },

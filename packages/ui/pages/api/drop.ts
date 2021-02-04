@@ -1,36 +1,55 @@
 import { makeMessage } from 'common/lib/message';
+import { DropArguments, DropArgumentsSchema } from 'common/lib/schemas/DropArgumentsSchema';
+import { DropGrant, DropGrantSchema } from 'common/lib/schemas/DropGrantSchema';
+import { DropToken, DropTokenSchema } from 'common/lib/schemas/DropTokenSchema';
+import { createValidator } from 'common/lib/validation';
+import { decode } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { executeGrant, validateGrantOnChain } from 'server/lib/chain';
+import { getGranter } from 'server/lib/granter';
 import { digestify, recoverAddress } from 'server/lib/proof';
 import { verifyToken } from 'server/lib/token';
 
-interface DropGrant {
-  tokenId: number;
-}
+const validateArgs = createValidator<DropArguments>(DropArgumentsSchema);
+const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
+const validateGrant = createValidator<DropGrant>(DropGrantSchema);
 
-export default function drop(req: NextApiRequest, res: NextApiResponse) {
+export default async function drop(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(400).end();
 
-  const token = req.body.token as string;
-  const address = req.body.address as string;
-  const signature = req.body.signature as string;
+  const args = {
+    token: req.body.token as string,
+    address: req.body.address as string,
+    signature: req.body.signature as string,
+  };
 
-  const message = makeMessage(address);
+  // conditional shortcircuit for type
+  if (!validateArgs(args)) throw new Error('unreachable');
 
   // recover proof to get address
-  const to = recoverAddress(digestify(message), signature);
+  const message = makeMessage(args.address);
+  const to = recoverAddress(digestify(message), args.signature);
 
-  console.log(process.env.OOTMM_PUBLIC_KEY);
+  const parsed = decode(args.token);
 
-  // TODO: look up publicKey by issuer
-  // const parsed = decode(token) as Record<string, any>;
-  // const issuer = parsed.iss as string;
-  const publicKey = process.env.OOTMM_PUBLIC_KEY;
+  // conditional shortcircuit for type
+  if (!validateTokenWithGrant(parsed)) throw new Error('unreachable');
 
-  const payload = verifyToken(token, publicKey);
+  const granter = await getGranter(parsed.iss);
 
-  console.log(payload);
+  // this typecast is safe because of validateTokenWithGrant above
+  const { grant } = verifyToken(args.token, granter.publicKey) as DropToken;
 
-  // TODO: verify payload against schema, cast to type
+  // conditional shortcircuit for type
+  if (!validateGrant(grant)) throw new Error('unreachable');
 
-  res.status(200).json({ payload });
+  // validate grant on-chain
+  if (!validateGrantOnChain(granter, grant, to)) throw new Error('unreachable');
+
+  // here we're happy with the input that's been provided and can send off the transaction
+  const tx = await executeGrant(granter, grant, to);
+
+  console.log(tx);
+
+  res.status(200).json({ hash: tx.hash });
 }

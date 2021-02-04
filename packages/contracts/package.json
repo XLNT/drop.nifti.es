@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn hardhat node",
+    "deploy": "yarn hardhat run scripts/deploy.ts",
     "test": "yarn hardhat test"
   },
   "dependencies": {
@@ -19,6 +20,8 @@
     "ethereum-waffle": "^3.2.2",
     "ethers": "^5.0.26",
     "hardhat": "^2.0.8",
+    "hardhat-deploy": "^0.7.0-beta.44",
+    "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "hardhat-preprocessor": "^0.1.1",
     "hardhat-typechain": "^0.3.4",
     "ts-generator": "^0.1.1",

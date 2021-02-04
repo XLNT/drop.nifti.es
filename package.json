@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "dev": "lerna run --parallel dev",
+    "test": "lerna run --parallel test",
     "package:sort": "npx sort-package-json && lerna exec -- npx sort-package-json"
   },
   "devDependencies": {
