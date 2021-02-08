@@ -7,16 +7,16 @@ export enum GrantType {
 
 export interface MintDropGrant {
   type: GrantType.Mint;
-  ids: number[];
-  amounts: number[];
+  ids: string[];
+  amounts: string[];
   data?: string;
 }
 
 export interface TransferDropGrant {
   type: GrantType.Transfer;
   from: string;
-  ids: number[];
-  amounts: number[];
+  ids: string[];
+  amounts: string[];
   data?: string;
 }
 
@@ -27,8 +27,8 @@ const MintDropGrantSchema: AnySchemaObject = {
   type: 'object',
   properties: {
     type: { type: 'string', enum: Object.values(GrantType) },
-    ids: { type: 'array', items: { type: 'number' }, minItems: 1 },
-    amounts: { type: 'array', items: { type: 'number', minimum: 0 }, minItems: 1 },
+    ids: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
+    amounts: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
     data: { type: 'string' },
   },
   required: ['type', 'ids', 'amounts'],
@@ -41,8 +41,8 @@ const TransferDropGrantSchema: AnySchemaObject = {
   properties: {
     type: { type: 'string', enum: Object.values(GrantType) },
     from: { type: 'string' },
-    ids: { type: 'array', items: { type: 'number' }, minItems: 1 },
-    amounts: { type: 'array', items: { type: 'number', minimum: 0 }, minItems: 1 },
+    ids: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
+    amounts: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
     data: { type: 'string' },
   },
   required: ['type', 'from', 'ids', 'amounts'],

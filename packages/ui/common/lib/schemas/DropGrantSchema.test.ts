@@ -9,8 +9,8 @@ import {
 
 const mint: MintDropGrant = {
   type: GrantType.Mint,
-  ids: [0],
-  amounts: [1],
+  ids: ['0x0'],
+  amounts: ['0x1'],
 };
 
 const mintWithData: MintDropGrant = {
@@ -21,8 +21,8 @@ const mintWithData: MintDropGrant = {
 const transfer: TransferDropGrant = {
   type: GrantType.Transfer,
   from: '0x0',
-  ids: [0],
-  amounts: [1],
+  ids: ['0x0'],
+  amounts: ['0x1'],
 };
 
 const transferWithData = {
@@ -35,14 +35,14 @@ const valid: DropGrant[] = [mint, mintWithData, transfer, transferWithData];
 const invalid: Partial<DropGrant>[] = [
   { type: GrantType.Mint },
   { type: GrantType.Mint, ids: [] },
-  { type: GrantType.Mint, ids: [1], amounts: [] },
-  { type: GrantType.Mint, ids: [1], amounts: [0] },
+  { type: GrantType.Mint, ids: ['0x1'], amounts: [] },
+  { type: GrantType.Mint, ids: ['0x1'], amounts: ['0x0'] },
   //
   { type: GrantType.Transfer },
   { type: GrantType.Transfer, ids: [] },
-  { type: GrantType.Transfer, ids: [1], amounts: [] },
-  { type: GrantType.Transfer, ids: [1], amounts: [0] },
-  { type: GrantType.Transfer, from: '', ids: [1], amounts: [0] },
+  { type: GrantType.Transfer, ids: ['0x1'], amounts: [] },
+  { type: GrantType.Transfer, ids: ['0x1'], amounts: ['0x0'] },
+  { type: GrantType.Transfer, from: '', ids: ['0x1'], amounts: ['0x0'] },
 ];
 
 const validate = createValidator(DropGrantSchema);

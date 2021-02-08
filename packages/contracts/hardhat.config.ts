@@ -56,7 +56,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: {
-      default: '0x4aD0F9baa6c061696655AB4664e2aD09d43Ce83b',
+      default: '0xD94ADD50f8EdD5C1973643C151A071C690C8FCb3',
     },
   },
 };

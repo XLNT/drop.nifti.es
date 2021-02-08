@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "yarn hardhat node",
+    "dev": "yarn hardhat node --network hardhat",
     "deploy": "yarn hardhat run scripts/deploy.ts",
     "test": "yarn hardhat test"
   },

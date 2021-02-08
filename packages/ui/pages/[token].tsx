@@ -1,67 +1,106 @@
-import { Button, Text } from '@chakra-ui/react';
+import { Button, Center, Divider, Text, VStack } from '@chakra-ui/react';
 import WalletConnect from '@walletconnect/client';
-import registry from '@walletconnect/mobile-registry';
-import type { IMobileRegistryEntry, IQRCodeModal, ISessionParams } from '@walletconnect/types';
-import { WalletButton } from 'client/components/WalletButton';
+import qrcodeModal from '@walletconnect/qrcode-modal';
+import type { ISessionParams } from '@walletconnect/types';
+import { DropLayout } from 'client/components/DropLayout';
+import { RenderNifty } from 'client/components/RenderNifty';
+import { Step } from 'client/components/Step';
 import { makeMessage } from 'common/lib/message';
 import { utils } from 'ethers';
 import { useRouter } from 'next/dist/client/router';
-import { useCallback, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import { useCallback, useEffect, useReducer } from 'react';
+import Confetti from 'react-confetti';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
-const REGISTRY = registry.filter((entry) =>
-  [
-    'Rainbow',
-    // 'Trust Wallet',
-    // 'Argent',
-  ].includes(entry.name),
-);
+const connector = new WalletConnect({
+  bridge: 'https://bridge.walletconnect.org',
+  qrcodeModal,
+  qrcodeModalOptions: { mobileLinks: ['rainbow', 'trust wallet', 'argent'] },
+  clientMeta: {
+    name: 'Drop Nifties',
+    description: 'Some stickers',
+    url: 'https://drop.nifti.es',
+    icons: [
+      'https://uploads-ssl.webflow.com/5e73d2e36a448d3100d70d9b/5ef54e60b872cb1683663d58_favicon.png',
+    ],
+  },
+});
 
-const makeConnector = (qrcodeModal?: IQRCodeModal) =>
-  new WalletConnect({
-    bridge: 'https://bridge.walletconnect.org',
-    qrcodeModal,
-    clientMeta: {
-      name: 'Drop Nifties',
-      description: 'Some stickers',
-      url: 'https://drop.nifti.es',
-      icons: [
-        'https://uploads-ssl.webflow.com/5e73d2e36a448d3100d70d9b/5ef54e60b872cb1683663d58_favicon.png',
-      ],
-    },
-  });
+interface State {
+  address?: string;
+  signature?: string;
+  hash?: string;
+  loading: boolean;
+  error?: Error;
+}
+
+type Action =
+  | { type: 'setAddress'; address: string }
+  | { type: 'setSignature'; signature: string }
+  | { type: 'setError'; error: Error }
+  | { type: 'startLoading' }
+  | { type: 'setHash'; hash: string }
+  | { type: 'reset' };
+
+const INITIAL_STATE: State = { loading: false };
+
+const reducer = (state: State, action: Action) => {
+  switch (action.type) {
+    case 'setAddress':
+      return { ...state, address: action.address, loading: false, error: undefined };
+    case 'setSignature':
+      return { ...state, signature: action.signature, loading: false, error: undefined };
+    case 'setHash':
+      return { ...state, hash: action.hash, loading: false, error: undefined };
+    case 'setError':
+      return { ...state, error: action.error, loading: false };
+    case 'startLoading':
+      return { ...state, loading: true, error: undefined };
+    case 'reset':
+      return INITIAL_STATE;
+    default:
+      return state;
+  }
+};
+
+enum DropStep {
+  ConnectWallet,
+  SignMessage,
+  Complete,
+}
 
 export default function Drop() {
   const router = useRouter();
   const token = router.query.token as string;
 
-  const [connector, setConnector] = useState<WalletConnect>();
+  const { width, height } = useWindowSize();
 
-  useEffect(() => {
-    if (!isMobile) {
-      import('@walletconnect/qrcode-modal')
-        .then((qrcodeModal) => {
-          setConnector(makeConnector(qrcodeModal.default));
-        })
-        .catch(setError);
-    } else {
-      setConnector(makeConnector());
-    }
+  const [{ address, signature, hash, loading, error }, dispatch] = useReducer(
+    reducer,
+    INITIAL_STATE,
+  );
+
+  const startLoading = useCallback(() => dispatch({ type: 'startLoading' }), []);
+  const setAddress = useCallback(
+    (address: string) => dispatch({ type: 'setAddress', address }),
+    [],
+  );
+  const setSignature = useCallback(
+    (signature: string) => dispatch({ type: 'setSignature', signature }),
+    [],
+  );
+  const setHash = useCallback((hash: string) => dispatch({ type: 'setHash', hash }), []);
+  const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
+  const reset = useCallback(() => {
+    if (connector.connected) connector.killSession();
+    dispatch({ type: 'reset' });
   }, []);
 
-  const [loading, setLoading] = useState(false);
-  const [uri, setUri] = useState<string>();
-  const [selectedEntry, setSelectedEntry] = useState<IMobileRegistryEntry>();
-  const [signature, setSignature] = useState<string>();
-  const [address, setAddress] = useState<string>();
-  const [error, setError] = useState<Error>();
+  const step = hash ? DropStep.Complete : address ? DropStep.SignMessage : DropStep.ConnectWallet;
 
   useEffect(() => {
     if (!connector) return;
-    if (connector.connected) {
-      setAddress(connector.accounts[0]);
-      return;
-    }
+    if (connector.connected) return setAddress(connector.accounts[0]);
 
     connector.on('connect', (error, payload) => {
       if (error) return setError(error);
@@ -76,35 +115,14 @@ export default function Drop() {
     return () => {
       if (connector.connected) connector.killSession();
     };
-  }, [connector]);
+  }, [setAddress, setError]);
 
   const createSession = useCallback(() => {
-    connector
-      .createSession()
-      .then(() => setUri(connector.uri))
-      .catch(setError);
-  }, [connector]);
-
-  useEffect(() => {
-    if (!connector) return;
-    if (isMobile) createSession();
-  }, [connector, createSession]);
+    connector.createSession().catch(setError);
+  }, [setError]);
 
   const handleSign = useCallback(async () => {
-    if (isMobile) {
-      // redirect to rainbow in the future...
-      setTimeout(
-        () =>
-          window.open(
-            selectedEntry.universalLink ??
-              `${selectedEntry.deepLink}${selectedEntry.deepLink.endsWith(':') ? '//' : '/'}`,
-          ),
-        500,
-      );
-    }
-
-    // request signature immediately
-    setLoading(true);
+    startLoading();
     try {
       const signature = await connector.signPersonalMessage([
         utils.toUtf8Bytes(makeMessage(address)),
@@ -113,66 +131,94 @@ export default function Drop() {
       setSignature(signature);
     } catch (error) {
       setError(error);
-    } finally {
-      setLoading(false);
     }
-  }, [address, connector, selectedEntry]);
+  }, [address, setError, setSignature, startLoading]);
 
   const handleDrop = useCallback(async () => {
+    startLoading();
     try {
-      setLoading(true);
-      await fetch('/api/drop', {
+      const response = await fetch('/api/drop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, address, signature }),
       });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setHash(data.hash);
     } catch (error) {
       setError(error);
-    } finally {
-      setLoading(false);
     }
-  }, [address, signature, token]);
+  }, [address, setError, setHash, signature, startLoading, token]);
 
-  if (error) {
-    return <Text color="tomato">{error.message}</Text>;
-  }
-
-  if (address && signature) {
-    return (
-      <Button onClick={handleDrop} isLoading={loading}>
-        Submit
-      </Button>
-    );
-  }
-
-  if (address) {
-    return (
-      <Button onClick={handleSign} isLoading={loading}>
-        Sign Message
-      </Button>
-    );
-  }
-
-  if (isMobile) {
-    return (
-      <div>
-        {uri &&
-          REGISTRY.map((entry) => (
-            <WalletButton
-              key={entry.name}
-              entry={entry}
-              uri={uri}
-              onClick={() => setSelectedEntry(entry)}
-              isLoading={!connector}
-            />
-          ))}
-      </div>
-    );
-  }
+  // auto-submit after signature
+  useEffect(() => {
+    if (address && signature) handleDrop();
+  }, [address, handleDrop, signature]);
 
   return (
-    <Button onClick={createSession} isLoading={!connector}>
-      Wallet Connect
-    </Button>
+    <DropLayout
+      footer={
+        step === DropStep.Complete ? (
+          <Button
+            as="a"
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`https://etherscan.io/tx/${hash}`}
+            width="full"
+          >
+            View on Etherscan
+          </Button>
+        ) : step === DropStep.SignMessage ? (
+          <Button onClick={handleSign} isLoading={loading} width="full">
+            Prove Ownership
+          </Button>
+        ) : (
+          <Button onClick={createSession} isLoading={!connector} width="full">
+            Connect Wallet
+          </Button>
+        )
+      }
+    >
+      {hash && <Confetti width={width} height={height} />}
+
+      <VStack spacing={4} align="stretch">
+        <Center>
+          <RenderNifty
+            metadata={{
+              image: 'http://localhost:3001/images/buddha.png',
+              name: 'buddha matt',
+              description:
+                'some really really really really really really really really long description',
+            }}
+          />
+        </Center>
+
+        <Divider />
+
+        {error && (
+          <>
+            <Text color="tomato">{error.message}</Text>
+            <Divider />
+          </>
+        )}
+
+        {/* TODO: some 3-step process with greyed-out steps, etc */}
+        <VStack spacing={4} align="stretch">
+          <Step
+            number={1}
+            active={step === DropStep.ConnectWallet}
+            onClick={step !== DropStep.ConnectWallet ? reset : undefined}
+          >
+            Download or connect an Ethereum wallet.
+          </Step>
+          <Step number={2} active={step === DropStep.SignMessage}>
+            Prove ownership of your address
+          </Step>
+          <Step number={3} active={step === DropStep.Complete}>
+            That&apos;s it!
+          </Step>
+        </VStack>
+      </VStack>
+    </DropLayout>
   );
 }

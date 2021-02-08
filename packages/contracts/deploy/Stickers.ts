@@ -1,6 +1,6 @@
 import { DeployFunction, DeployResult } from 'hardhat-deploy/types';
 
-const uri = `https://themanymatts.lol/sticker/{id}.json`;
+const uri = `https://themanymatts.lol/metadata/{id}.json`;
 
 const main: DeployFunction = async function ({
   getNamedAccounts,

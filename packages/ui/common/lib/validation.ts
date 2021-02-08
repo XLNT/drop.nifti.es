@@ -14,6 +14,7 @@ const ajv = new Ajv();
 
 ajv.addFormat('jwt', (value) => decode(value) !== null);
 ajv.addFormat('address', (value) => isAddress(value));
+ajv.addFormat('hex', (value) => isHexString(value));
 ajv.addFormat('signature', (value) => isHexString(value));
 
 // standard validate function that captures ajv.compile, and throws if there are errors

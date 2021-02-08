@@ -87,14 +87,15 @@ export default function Home() {
                 </ListItem>
                 <ListItem>link your signer and ERC1155 contract here on drop.nifti.es.</ListItem>
                 <ListItem>
-                  allow drop.nifti.es to mint and transfer assets <sup>(if necessary)</sup>
+                  allow drop.nifti.es to mint and transfer assets with
+                  <Code>setApprovalForAll(...)</Code> <sup>(if necessary)</sup>
                 </ListItem>
                 <ListItem>
                   fund the{' '}
                   <Link href="https://opengsn.org" isExternal>
                     Gas Station Network&apos;s RelayHub
                   </Link>{' '}
-                  to pay for you user&apos;s gas.
+                  to pay for your users&apos; gas.
                 </ListItem>
               </UnorderedList>
             </ListItem>
@@ -110,7 +111,7 @@ export default function Home() {
               </UnorderedList>
             </ListItem>
             <ListItem>
-              Forward that link to your beneficiary
+              Forward a link to your beneficiary, perhaps in a nice email or something
               <UnorderedList>
                 <ListItem>
                   <Code>{`https://drop.nifti.es/:token`}</Code>
@@ -121,7 +122,7 @@ export default function Home() {
           </OrderedList>
         </VStack>
         <Divider />
-        <VStack align="start" spacing={16} px={8}>
+        <VStack align="start" spacing={8} px={8}>
           <Text textStyle="highlightable" lineHeight="taller">
             📦 drop.nifi.es is a{' '}
             <Link href="https://nifti.es" isExternal>
@@ -141,7 +142,7 @@ export default function Home() {
             </Link>
             . You can view, edit, and audit the code on{' '}
             <Link href="https://github.com/xlnt/drop.nifti.es" isExternal>
-              <Pill prefix="📄">GitHub</Pill>
+              <Pill prefix="📂">GitHub</Pill>
             </Link>
             .
           </Text>
