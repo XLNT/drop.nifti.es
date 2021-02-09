@@ -1,10 +1,22 @@
 import { Text } from '@chakra-ui/react';
-import { PropsWithChildren, ReactNode } from 'react';
+import { PropsWithChildren } from 'react';
 
-export function Pill({ prefix, children }: PropsWithChildren<{ prefix: ReactNode }>) {
+export function Pill({ prefix, children }: PropsWithChildren<{ prefix: string }>) {
   return (
-    <Text as="span" bg="smudge" px="1" borderRadius={4} textStyle="highlightable">
-      {prefix}&nbsp;{children}
+    <Text
+      as="span"
+      bg="smudge"
+      p={1}
+      borderRadius={4}
+      textStyle="highlightable"
+      _before={{
+        content: `"${prefix}"`,
+        display: 'inline-block',
+        textDecoration: 'none',
+        paddingRight: 1,
+      }}
+    >
+      {children}
     </Text>
   );
 }

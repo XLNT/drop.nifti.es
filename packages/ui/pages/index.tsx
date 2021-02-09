@@ -134,7 +134,7 @@ export default function Home() {
             </Link>{' '}
             for{' '}
             <Link href="https://themanymatts.lol" isExternal>
-              <Pill prefix="✋">themanymatts</Pill>.
+              <Pill prefix="✋">themanymatts</Pill>
             </Link>{' '}
             and{' '}
             <Link href="https://softspot.art" isExternal>

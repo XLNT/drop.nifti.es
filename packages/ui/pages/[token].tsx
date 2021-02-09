@@ -38,7 +38,6 @@ interface State {
 
 type Action =
   | { type: 'setAddress'; address: string }
-  | { type: 'setSignature'; signature: string }
   | { type: 'setError'; error: Error }
   | { type: 'startLoading' }
   | { type: 'setHash'; hash: string }
@@ -48,8 +47,6 @@ const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'setAddress':
       return { ...state, address: action.address, loading: false, error: undefined };
-    case 'setSignature':
-      return { ...state, signature: action.signature, loading: false, error: undefined };
     case 'setHash':
       return { ...state, hash: action.hash, loading: false, error: undefined };
     case 'setError':
@@ -75,7 +72,7 @@ export default function Drop() {
 
   const { width, height } = useWindowSize();
 
-  const [{ connector, address, signature, hash, loading, error }, dispatch] = useReducer(
+  const [{ connector, address, hash, loading, error }, dispatch] = useReducer(
     reducer,
     undefined,
     () => ({ loading: false, connector: makeConnector() }),
@@ -86,16 +83,15 @@ export default function Drop() {
     (address: string) => dispatch({ type: 'setAddress', address }),
     [],
   );
-  const setSignature = useCallback(
-    (signature: string) => dispatch({ type: 'setSignature', signature }),
-    [],
-  );
   const setHash = useCallback((hash: string) => dispatch({ type: 'setHash', hash }), []);
   const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
-  const reset = useCallback(() => {
-    if (connector.connected) connector.killSession();
+  const reset = useCallback(async () => {
+    if (connector.connected) {
+      startLoading();
+      await connector.killSession();
+    }
     dispatch({ type: 'reset' });
-  }, [connector]);
+  }, [connector, startLoading]);
 
   const step = hash ? DropStep.Complete : address ? DropStep.SignMessage : DropStep.ConnectWallet;
 
@@ -122,6 +118,25 @@ export default function Drop() {
     connector.createSession().catch(setError);
   }, [connector, setError]);
 
+  const handleDrop = useCallback(
+    async (signature: string) => {
+      startLoading();
+      try {
+        const response = await fetch('/api/drop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, address, signature }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        setHash(data.hash);
+      } catch (error) {
+        setError(error);
+      }
+    },
+    [address, setError, setHash, startLoading, token],
+  );
+
   const handleSign = useCallback(async () => {
     startLoading();
     try {
@@ -129,32 +144,12 @@ export default function Drop() {
         utils.toUtf8Bytes(makeMessage(address)),
         address,
       ]);
-      setSignature(signature);
+      // auto-submit after signature
+      handleDrop(signature);
     } catch (error) {
       setError(error);
     }
-  }, [address, connector, setError, setSignature, startLoading]);
-
-  const handleDrop = useCallback(async () => {
-    startLoading();
-    try {
-      const response = await fetch('/api/drop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, address, signature }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-      setHash(data.hash);
-    } catch (error) {
-      setError(error);
-    }
-  }, [address, setError, setHash, signature, startLoading, token]);
-
-  // auto-submit after signature
-  useEffect(() => {
-    if (address && signature) handleDrop();
-  }, [address, handleDrop, signature]);
+  }, [address, connector, handleDrop, setError, startLoading]);
 
   return (
     <DropLayout
@@ -207,6 +202,13 @@ export default function Drop() {
         <VStack spacing={4} align="stretch">
           <Step
             number={1}
+            secondary={
+              address && (
+                <Text fontSize="xs" fontFamily="mono" isTruncated>
+                  {address}
+                </Text>
+              )
+            }
             active={step === DropStep.ConnectWallet}
             onClick={step !== DropStep.ConnectWallet ? reset : undefined}
           >

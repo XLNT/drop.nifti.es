@@ -82,7 +82,16 @@ const RenderNiftyAsset = forwardRef<{ result: NiftyResult }, ElementType<any>>(
 
     switch (data.type) {
       case NiftyType.Image:
-        return <Image ref={ref} src={data.image} alt={alt} {...delegated} />;
+        return (
+          <Image
+            ref={ref}
+            src={data.image}
+            alt={alt}
+            objectFit="contain"
+            objectPosition="center"
+            {...delegated}
+          />
+        );
       default:
         throw new Error(`Unknown nifty type: ${data.type}`);
     }
@@ -95,7 +104,7 @@ export function RenderNifty(props: RenderNiftyProps) {
   return (
     <VStack spacing={4} align="stretch">
       <Center>
-        <RenderNiftyAsset height={64} result={result} />
+        <RenderNiftyAsset height={[48, 64]} result={result} />
       </Center>
 
       {result.metadata?.name ? (

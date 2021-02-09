@@ -24,6 +24,7 @@
     "ajv": "^7.0.4",
     "dotenv": "^8.2.0",
     "ethers": "^5.0.27",
+    "faunadb": "^4.0.3",
     "framer-motion": "^3.2.2-rc.1",
     "jsonwebtoken": "^8.5.1",
     "next": "10.0.6",

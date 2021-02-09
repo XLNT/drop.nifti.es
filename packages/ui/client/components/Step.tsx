@@ -1,6 +1,6 @@
-import { Box, forwardRef, HStack, Text } from '@chakra-ui/react';
+import { Box, forwardRef, HStack, Text, VStack } from '@chakra-ui/react';
 import { isValidMotionProp, motion } from 'framer-motion';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactNode } from 'react';
 
 // 1. Create a custom motion component from Box
 const MotionHStack = motion.custom(
@@ -16,11 +16,18 @@ const MotionHStack = motion.custom(
 export function Step({
   number,
   children,
+  secondary,
   active = false,
   onClick,
-}: PropsWithChildren<{ number: number; active?: boolean; onClick?: VoidFunction }>) {
+}: PropsWithChildren<{
+  number: number;
+  secondary?: ReactNode;
+  active?: boolean;
+  onClick?: VoidFunction;
+}>) {
   return (
     <MotionHStack
+      spacing={4}
       direction="row"
       cursor={onClick ? 'pointer' : undefined}
       onClick={onClick}
@@ -31,10 +38,13 @@ export function Step({
         scale: active ? 1 : 0.8,
       }}
     >
-      <Text fontWeight="bold" fontSize="3xl" width={8}>
+      <Text fontWeight="bold" fontSize="3xl" width={4} flexShrink={0}>
         {number}
       </Text>
-      <Box flex={1}>{children}</Box>
+      <VStack align="stretch" flex={1} spacing={1}>
+        <Box>{children}</Box>
+        {secondary}
+      </VStack>
     </MotionHStack>
   );
 }
