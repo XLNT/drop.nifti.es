@@ -9,6 +9,7 @@ export function Pill({ prefix, children }: PropsWithChildren<{ prefix: string }>
       p={1}
       borderRadius={4}
       textStyle="highlightable"
+      whiteSpace="nowrap"
       _before={{
         content: `"${prefix}"`,
         display: 'inline-block',

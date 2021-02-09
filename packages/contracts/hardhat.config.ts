@@ -7,6 +7,7 @@ import '@nomiclabs/hardhat-solhint';
 import 'hardhat-typechain';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
+import '@nomiclabs/hardhat-etherscan';
 
 import { utils } from 'ethers';
 import { HardhatUserConfig, task } from 'hardhat/config';
@@ -50,6 +51,13 @@ const hardhatConfig: HardhatUserConfig = {
       //   blockNumber: 11760686,
       // }
     },
+    mainnet: {
+      url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts: [process.env.SIGNER_PRIVATE_KEY as string],
+    },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   preprocess: {
     eachLine: removeConsoleLog((bre) => !['hardhat', 'localhost'].includes(bre.network.name)),
