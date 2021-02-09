@@ -1,7 +1,7 @@
 import { DropGrant, GrantType } from 'common/lib/schemas/DropGrantSchema';
 import { ethers } from 'ethers';
 
-import ERC1155Artifact from '../../../contracts/artifacts/@openzeppelin/contracts/token/ERC1155/ERC1155.sol/ERC1155.json';
+import ERC1155PresetMinterPauserArtifact from '../../../contracts/artifacts/@openzeppelin/contracts/presets/ERC1155PresetMinterPauser.sol/ERC1155PresetMinterPauser.json';
 import { ERC1155PresetMinterPauser } from '../../../contracts/typechain/ERC1155PresetMinterPauser';
 import { Granter } from './granter';
 
@@ -16,7 +16,7 @@ const EMPTY_DATA = ethers.utils.arrayify(0);
 function getContract(address: string) {
   return (new ethers.Contract(
     address,
-    ERC1155Artifact.abi,
+    ERC1155PresetMinterPauserArtifact.abi,
     signer,
   ) as unknown) as ERC1155PresetMinterPauser;
 }

@@ -186,7 +186,7 @@ export default function Drop() {
         <Center>
           <RenderNifty
             metadata={{
-              image: 'http://localhost:3001/images/buddha.png',
+              image: 'https://themanymatts.lol/images/buddha.png',
               name: 'buddha matt',
               description:
                 'some really really really really really really really really long description',

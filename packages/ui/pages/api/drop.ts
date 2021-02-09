@@ -7,7 +7,7 @@ import { decode } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { executeGrant, validateGrantOnChain } from 'server/lib/chain';
 import { getGranter } from 'server/lib/granter';
-import { handler, nope } from 'server/lib/handler';
+import { handler, nope, yup } from 'server/lib/handler';
 import { digestify, recoverAddress } from 'server/lib/proof';
 import { verifyToken } from 'server/lib/token';
 
@@ -66,5 +66,5 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
   // here we're happy with the input that's been provided and can send off the transaction
   const tx = await executeGrant(granter, grant, to);
 
-  return { hash: tx.hash };
+  return yup(res, { hash: tx.hash });
 });
