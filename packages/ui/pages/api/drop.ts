@@ -7,6 +7,7 @@ import { decode } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { executeGrant, validateGrantOnChain } from 'server/lib/chain';
 import { getGranter } from 'server/lib/granter';
+import { handler, nope } from 'server/lib/handler';
 import { digestify, recoverAddress } from 'server/lib/proof';
 import { verifyToken } from 'server/lib/token';
 
@@ -14,8 +15,8 @@ const validateArgs = createValidator<DropArguments>(DropArgumentsSchema);
 const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
 const validateGrant = createValidator<DropGrant>(DropGrantSchema);
 
-export default async function drop(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(400).end();
+export default handler(async function drop(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') return nope(res, 400, `<dog fetch meme> No ${req.method}. Only POST.`);
 
   const args = {
     token: req.body.token as string,
@@ -23,8 +24,12 @@ export default async function drop(req: NextApiRequest, res: NextApiResponse) {
     signature: req.body.signature as string,
   };
 
-  // conditional shortcircuit for type
-  if (!validateArgs(args)) throw new Error('unreachable');
+  try {
+    // conditional shortcircuit for type
+    if (!validateArgs(args)) throw new Error('unreachable');
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
   // recover proof to get address
   const message = makeMessage(args.address);
@@ -32,24 +37,34 @@ export default async function drop(req: NextApiRequest, res: NextApiResponse) {
 
   const parsed = decode(args.token);
 
-  // conditional shortcircuit for type
-  if (!validateTokenWithGrant(parsed)) throw new Error('unreachable');
+  try {
+    // conditional shortcircuit for type
+    if (!validateTokenWithGrant(parsed)) throw new Error('unreachable');
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
   const granter = await getGranter(parsed.iss);
 
   // this typecast is safe because of validateTokenWithGrant above
   const { grant } = verifyToken(args.token, granter.publicKey) as DropToken;
 
-  // conditional shortcircuit for type
-  if (!validateGrant(grant)) throw new Error('unreachable');
+  try {
+    // conditional shortcircuit for type
+    if (!validateGrant(grant)) throw new Error('unreachable');
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
-  // validate grant on-chain
-  if (!validateGrantOnChain(granter, grant, to)) throw new Error('unreachable');
+  try {
+    // conditional shortcircuit for type
+    if (!validateGrantOnChain(granter, grant, to)) throw new Error('unreachable');
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
   // here we're happy with the input that's been provided and can send off the transaction
   const tx = await executeGrant(granter, grant, to);
 
-  console.log(tx);
-
-  res.status(200).json({ hash: tx.hash });
-}
+  return { hash: tx.hash };
+});

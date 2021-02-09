@@ -12,21 +12,23 @@ import { useCallback, useEffect, useReducer } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
 
-const connector = new WalletConnect({
-  bridge: 'https://bridge.walletconnect.org',
-  qrcodeModal,
-  qrcodeModalOptions: { mobileLinks: ['rainbow', 'trust wallet', 'argent'] },
-  clientMeta: {
-    name: 'Drop Nifties',
-    description: 'Some stickers',
-    url: 'https://drop.nifti.es',
-    icons: [
-      'https://uploads-ssl.webflow.com/5e73d2e36a448d3100d70d9b/5ef54e60b872cb1683663d58_favicon.png',
-    ],
-  },
-});
+const makeConnector = () =>
+  new WalletConnect({
+    bridge: 'https://bridge.walletconnect.org',
+    qrcodeModal,
+    qrcodeModalOptions: { mobileLinks: ['rainbow', 'trust wallet', 'argent'] },
+    clientMeta: {
+      name: 'Drop Nifties',
+      description: 'Some stickers',
+      url: 'https://drop.nifti.es',
+      icons: [
+        'https://uploads-ssl.webflow.com/5e73d2e36a448d3100d70d9b/5ef54e60b872cb1683663d58_favicon.png',
+      ],
+    },
+  });
 
 interface State {
+  connector: WalletConnect;
   address?: string;
   signature?: string;
   hash?: string;
@@ -42,8 +44,6 @@ type Action =
   | { type: 'setHash'; hash: string }
   | { type: 'reset' };
 
-const INITIAL_STATE: State = { loading: false };
-
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'setAddress':
@@ -57,7 +57,7 @@ const reducer = (state: State, action: Action) => {
     case 'startLoading':
       return { ...state, loading: true, error: undefined };
     case 'reset':
-      return INITIAL_STATE;
+      return { loading: false, connector: makeConnector() };
     default:
       return state;
   }
@@ -75,9 +75,10 @@ export default function Drop() {
 
   const { width, height } = useWindowSize();
 
-  const [{ address, signature, hash, loading, error }, dispatch] = useReducer(
+  const [{ connector, address, signature, hash, loading, error }, dispatch] = useReducer(
     reducer,
-    INITIAL_STATE,
+    undefined,
+    () => ({ loading: false, connector: makeConnector() }),
   );
 
   const startLoading = useCallback(() => dispatch({ type: 'startLoading' }), []);
@@ -94,7 +95,7 @@ export default function Drop() {
   const reset = useCallback(() => {
     if (connector.connected) connector.killSession();
     dispatch({ type: 'reset' });
-  }, []);
+  }, [connector]);
 
   const step = hash ? DropStep.Complete : address ? DropStep.SignMessage : DropStep.ConnectWallet;
 
@@ -115,11 +116,11 @@ export default function Drop() {
     return () => {
       if (connector.connected) connector.killSession();
     };
-  }, [setAddress, setError]);
+  }, [connector, setAddress, setError]);
 
   const createSession = useCallback(() => {
     connector.createSession().catch(setError);
-  }, [setError]);
+  }, [connector, setError]);
 
   const handleSign = useCallback(async () => {
     startLoading();
@@ -132,7 +133,7 @@ export default function Drop() {
     } catch (error) {
       setError(error);
     }
-  }, [address, setError, setSignature, startLoading]);
+  }, [address, connector, setError, setSignature, startLoading]);
 
   const handleDrop = useCallback(async () => {
     startLoading();

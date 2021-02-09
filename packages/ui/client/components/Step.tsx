@@ -18,10 +18,11 @@ export function Step({
   children,
   active = false,
   onClick,
-}: PropsWithChildren<{ number: number; active?: boolean; onClick: VoidFunction }>) {
+}: PropsWithChildren<{ number: number; active?: boolean; onClick?: VoidFunction }>) {
   return (
     <MotionHStack
       direction="row"
+      cursor={onClick ? 'pointer' : undefined}
       onClick={onClick}
       whileTap={onClick ? { scale: 0.9 } : undefined}
       transformOrigin="left center"

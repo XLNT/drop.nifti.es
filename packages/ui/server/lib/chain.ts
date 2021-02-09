@@ -1,7 +1,7 @@
 import { DropGrant, GrantType } from 'common/lib/schemas/DropGrantSchema';
 import { ethers } from 'ethers';
 
-import StickersArtifact from '../../../contracts/artifacts/contracts/Stickers.sol/Stickers.json';
+import ERC1155Artifact from '../../../contracts/artifacts/@openzeppelin/contracts/token/ERC1155/ERC1155.sol/ERC1155.json';
 import { ERC1155PresetMinterPauser } from '../../../contracts/typechain/ERC1155PresetMinterPauser';
 import { Granter } from './granter';
 
@@ -16,7 +16,7 @@ const EMPTY_DATA = ethers.utils.arrayify(0);
 function getContract(address: string) {
   return (new ethers.Contract(
     address,
-    StickersArtifact.abi,
+    ERC1155Artifact.abi,
     signer,
   ) as unknown) as ERC1155PresetMinterPauser;
 }
@@ -24,6 +24,7 @@ function getContract(address: string) {
 // verifies that a grant is valid on-chain and will most likely succeed
 export async function validateGrantOnChain(granter: Granter, grant: DropGrant, to: string) {
   const contract = getContract(granter.tokenAddress);
+
   switch (grant.type) {
     case GrantType.Mint: {
       if (!granter.allowFungible) {
@@ -31,6 +32,7 @@ export async function validateGrantOnChain(granter: Granter, grant: DropGrant, t
           grant.ids.map(() => to),
           grant.ids,
         );
+
         if (balances.some((balance) => balance.gte(1))) {
           throw new Error(`Would increase balance too far.`);
         }
