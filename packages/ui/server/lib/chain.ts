@@ -23,21 +23,10 @@ function getContract(address: string) {
 
 // verifies that a grant is valid on-chain and will most likely succeed
 export async function validateGrantOnChain(granter: Granter, grant: DropGrant, to: string) {
-  const contract = getContract(granter.tokenAddress);
+  // const contract = getContract(granter.tokenAddress);
 
   switch (grant.type) {
     case GrantType.Mint: {
-      if (!granter.allowFungible) {
-        const balances = await contract.balanceOfBatch(
-          grant.ids.map(() => to),
-          grant.ids,
-        );
-
-        if (balances.some((balance) => balance.gte(1))) {
-          throw new Error(`Would increase balance too far.`);
-        }
-      }
-
       return true;
     }
     case GrantType.Transfer: {
