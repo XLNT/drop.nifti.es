@@ -4,6 +4,7 @@ import { createValidator } from 'common/lib/validation';
 import { decode } from 'jsonwebtoken';
 import { getGranter } from 'server/lib/granter';
 import { handler, nope, yup } from 'server/lib/handler';
+import { tokenExists } from 'server/lib/token';
 
 const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
 
@@ -12,6 +13,8 @@ export default handler(async function data(req, res) {
   if (req.method !== 'GET') return nope(res, 400, `No ${req.method}. Only GET.`);
 
   const token = req.query.token as string;
+
+  const used = await tokenExists(token);
 
   const parsed = decode(token);
 
@@ -39,5 +42,6 @@ export default handler(async function data(req, res) {
   return yup(res, {
     granter,
     metadata,
+    error: used && `This drop has already been claimed.`,
   });
 });

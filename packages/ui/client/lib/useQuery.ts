@@ -20,6 +20,8 @@ export function useQuery<T>(
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       setData(data);
+
+      if (data.error) setError(new Error(data.error));
     } catch (error) {
       setError(error);
     } finally {
