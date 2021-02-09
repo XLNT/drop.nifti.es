@@ -1,10 +1,10 @@
-import { Box, BoxProps, Center, forwardRef, Heading, Image, Text, VStack } from '@chakra-ui/react';
+import { Box, Center, forwardRef, Heading, Image, Text, VStack } from '@chakra-ui/react';
 import { providers } from 'ethers';
 import { ElementType, useMemo } from 'react';
 
 import { Skeleton } from './Skeleton';
 
-interface ERC1155Metadata {
+export interface ERC1155Metadata {
   name?: string;
   description?: string;
   image?: string;
@@ -35,7 +35,7 @@ function useMetadata(props: RenderNiftyProps): MetadataResult {
     return { metadata: props.metadata, loading: false, error: undefined };
   }
 
-  // TODO: do some fetching
+  return { metadata: undefined, loading: true, error: undefined };
 }
 
 enum NiftyType {
@@ -102,17 +102,15 @@ export function RenderNifty(props: RenderNiftyProps) {
   const result = useNifty(props);
 
   return (
-    <VStack spacing={4} align="stretch">
-      <Center>
-        <RenderNiftyAsset height={[48, 64]} result={result} />
-      </Center>
+    <VStack align="stretch" spacing={4}>
+      <RenderNiftyAsset height={[48, 64]} result={result} />
 
       {result.metadata?.name ? (
         <Heading as="span" fontSize="lg">
           {result.metadata?.name}
         </Heading>
       ) : (
-        <Skeleton height={4} width="full" />
+        <Skeleton height={4} width={1 / 2} />
       )}
 
       {result.metadata?.description ? (

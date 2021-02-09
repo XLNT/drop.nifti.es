@@ -1,11 +1,7 @@
+import { Granter } from 'common/lib/granter';
 import { query as q } from 'faunadb';
 
 import { client } from './db';
-
-export interface Granter {
-  publicKey: string;
-  tokenAddress: string;
-}
 
 // TODO: look up publicKey by issuer - some type of dashboard to add public keys, idk
 export async function getGranter(issuer: string): Promise<Granter> {

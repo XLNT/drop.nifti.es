@@ -8,6 +8,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
+        <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           key="google"
           href="//fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap"

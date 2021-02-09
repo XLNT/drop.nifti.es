@@ -3,14 +3,21 @@ import WalletConnect from '@walletconnect/client';
 import qrcodeModal from '@walletconnect/qrcode-modal';
 import type { ISessionParams } from '@walletconnect/types';
 import { DropLayout } from 'client/components/DropLayout';
-import { RenderNifty } from 'client/components/RenderNifty';
+import { ERC1155Metadata, RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
+import { useQuery } from 'client/lib/useQuery';
+import { Granter } from 'common/lib/granter';
 import { makeMessage } from 'common/lib/message';
 import { utils } from 'ethers';
 import { useRouter } from 'next/dist/client/router';
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
+
+interface DropPageData {
+  granter: Pick<Granter, 'prefix' | 'name' | 'url'>;
+  metadata: ERC1155Metadata;
+}
 
 const makeConnector = () =>
   new WalletConnect({
@@ -70,13 +77,21 @@ export default function Drop() {
   const router = useRouter();
   const token = router.query.token as string;
 
+  const { data, loading: pageLoading, error: pageError } = useQuery<DropPageData>(
+    '/api/data',
+    useMemo(() => ({ token }), [token]),
+    { skip: !token },
+  );
+
   const { width, height } = useWindowSize();
 
-  const [{ connector, address, hash, loading, error }, dispatch] = useReducer(
-    reducer,
-    undefined,
-    () => ({ loading: false, connector: makeConnector() }),
-  );
+  const [
+    { connector, address, hash, loading: dropLoading, error: dropError },
+    dispatch,
+  ] = useReducer(reducer, undefined, () => ({ loading: false, connector: makeConnector() }));
+
+  const error = pageError || dropError;
+  const loading = pageLoading || dropLoading;
 
   const startLoading = useCallback(() => dispatch({ type: 'startLoading' }), []);
   const setAddress = useCallback(
@@ -153,6 +168,7 @@ export default function Drop() {
 
   return (
     <DropLayout
+      granter={data?.granter}
       footer={
         step === DropStep.Complete ? (
           <Button
@@ -178,16 +194,7 @@ export default function Drop() {
       {hash && <Confetti width={width} height={height} />}
 
       <VStack spacing={4} align="stretch">
-        <Center>
-          <RenderNifty
-            metadata={{
-              image: 'https://themanymatts.lol/images/buddha.png',
-              name: 'buddha matt',
-              description:
-                'some really really really really really really really really long description',
-            }}
-          />
-        </Center>
+        <RenderNifty metadata={data?.metadata} />
 
         <Divider />
 

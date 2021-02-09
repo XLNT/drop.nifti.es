@@ -1,3 +1,4 @@
+import { Granter } from 'common/lib/granter';
 import { makeMessage } from 'common/lib/message';
 import { DropArguments, DropArgumentsSchema } from 'common/lib/schemas/DropArgumentsSchema';
 import { DropGrant, DropGrantSchema } from 'common/lib/schemas/DropGrantSchema';
@@ -9,7 +10,7 @@ import { executeGrant, validateGrantOnChain } from 'server/lib/chain';
 import { getGranter } from 'server/lib/granter';
 import { handler, nope, yup } from 'server/lib/handler';
 import { digestify, recoverAddress } from 'server/lib/proof';
-import { verifyToken } from 'server/lib/token';
+import { lockToken, verifyToken } from 'server/lib/token';
 
 const validateArgs = createValidator<DropArguments>(DropArgumentsSchema);
 const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
@@ -44,7 +45,12 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
     return nope(res, 400, error.message);
   }
 
-  const granter = await getGranter(parsed.iss);
+  let granter: Granter;
+  try {
+    granter = await getGranter(parsed.iss);
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
   // this typecast is safe because of validateTokenWithGrant above
   const { grant } = verifyToken(args.token, granter.publicKey) as DropToken;
@@ -65,6 +71,9 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
 
   // here we're happy with the input that's been provided and can send off the transaction
   const tx = await executeGrant(granter, grant, to);
+
+  // lock the token after the tx is broadcast
+  await lockToken(args.token);
 
   return yup(res, { hash: tx.hash });
 });

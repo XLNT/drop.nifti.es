@@ -4,7 +4,7 @@ import { decode } from 'jsonwebtoken';
 
 export class ValidationError<T> extends Error {
   constructor(public errors?: ValidateFunction<T>['errors']) {
-    super('ValidationError');
+    super(`ValidationError: ${errors.map((err) => err.message).join(', ')}`);
     Object.setPrototypeOf(this, ValidationError.prototype);
     Error.captureStackTrace(this, ValidationError);
   }

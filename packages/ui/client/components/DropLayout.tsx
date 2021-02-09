@@ -1,9 +1,14 @@
 import { Box, Center, HStack, Link, Portal, Text, VStack } from '@chakra-ui/react';
+import { Granter } from 'common/lib/granter';
 import { PropsWithChildren, ReactNode } from 'react';
 
 import { Pill } from './Pill';
 
-export function DropLayout({ children, footer }: PropsWithChildren<{ footer: ReactNode }>) {
+export function DropLayout({
+  children,
+  footer,
+  granter,
+}: PropsWithChildren<{ footer: ReactNode; granter?: Pick<Granter, 'prefix' | 'name' | 'url'> }>) {
   return (
     <>
       {footer && (
@@ -24,12 +29,13 @@ export function DropLayout({ children, footer }: PropsWithChildren<{ footer: Rea
         </Portal>
       )}
       <VStack align="stretch" mx="auto" maxWidth="2xl" pt={4} pb={24} px={6}>
-        <HStack justify="space-between" wrap="wrap" spacing={1}>
-          {/* TODO: granter whitelabel */}
+        <HStack as="header" justify="space-between" wrap="wrap" spacing={1}>
           <Text py={2}>
-            <Link href="https://themanymatts.lol">
-              <Pill prefix="✋">themanymatts</Pill>
-            </Link>
+            {granter && (
+              <Link href={granter.url} isExternal>
+                <Pill prefix={granter.prefix}>{granter.name}</Pill>
+              </Link>
+            )}
           </Text>
           <HStack py={2} spacing={1}>
             <Text as="span" fontSize="xs" fontFamily="mono">
@@ -40,7 +46,9 @@ export function DropLayout({ children, footer }: PropsWithChildren<{ footer: Rea
             </Link>
           </HStack>
         </HStack>
-        <VStack align="stretch">{children}</VStack>
+        <VStack as="main" align="stretch">
+          {children}
+        </VStack>
       </VStack>
     </>
   );
