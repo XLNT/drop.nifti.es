@@ -62,6 +62,8 @@ export default handler(async function data(req, res) {
     return nope(res, 400, error.message);
   }
 
+  res.setHeader('Cache-Control', `s-maxage=${60 * 60}`);
+
   return yup(res, {
     granter,
     metadatas,
