@@ -45,13 +45,22 @@ export default handler(async function data(req, res) {
     return nope(res, 400, error.message);
   }
 
-  const metadatas = await Promise.all(
-    grant.ids.map((id) =>
-      fetch(
-        `https://use.nifti.es/api/${['eip155:1', granter.tokenAddress, id].join('/')}`,
-      ).then((response) => response.json()),
-    ),
-  );
+  let metadatas: any[];
+  try {
+    metadatas = await Promise.all(
+      grant.ids
+        .map((id) => ['eip155:1', `erc1155:${granter.tokenAddress}`, id].join('/'))
+        .map((id) =>
+          fetch(`https://use.nifti.es/api/${id}`).then(async (response) => {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            return data;
+          }),
+        ),
+    );
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
 
   return yup(res, {
     granter,
