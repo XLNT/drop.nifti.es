@@ -1,4 +1,4 @@
-import { Button, Center, Divider, Text, VStack } from '@chakra-ui/react';
+import { Button, Divider, Text, VStack } from '@chakra-ui/react';
 import WalletConnect from '@walletconnect/client';
 import qrcodeModal from '@walletconnect/qrcode-modal';
 import type { ISessionParams } from '@walletconnect/types';
@@ -16,7 +16,8 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 
 interface DropPageData {
   granter: Pick<Granter, 'prefix' | 'name' | 'url'>;
-  metadata: ERC1155Metadata;
+  // TODO: use typings from use.nifti.es here
+  metadatas: { metadata: ERC1155Metadata }[];
 }
 
 const makeConnector = () =>
@@ -28,9 +29,7 @@ const makeConnector = () =>
       name: 'Drop Nifties',
       description: 'Some stickers',
       url: 'https://drop.nifti.es',
-      icons: [
-        'https://uploads-ssl.webflow.com/5e73d2e36a448d3100d70d9b/5ef54e60b872cb1683663d58_favicon.png',
-      ],
+      icons: ['https://drop.nifti.es/favicon.png'],
     },
   });
 
@@ -194,7 +193,7 @@ export default function Drop() {
       {hash && <Confetti width={width} height={height} />}
 
       <VStack spacing={4} align="stretch">
-        <RenderNifty metadata={data?.metadata} />
+        <RenderNifty metadata={data?.metadatas?.[0]?.metadata} />
 
         <Divider />
 

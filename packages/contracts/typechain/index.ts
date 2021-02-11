@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { AccessControl } from './AccessControl';
-export type { Ownable } from './Ownable';
 export type { ERC165 } from './ERC165';
 export type { IERC165 } from './IERC165';
 export type { ERC1155PresetMinterPauser } from './ERC1155PresetMinterPauser';
@@ -16,7 +15,6 @@ export type { Pausable } from './Pausable';
 export type { Stickers } from './Stickers';
 
 export { AccessControl__factory } from './factories/AccessControl__factory';
-export { Ownable__factory } from './factories/Ownable__factory';
 export { ERC165__factory } from './factories/ERC165__factory';
 export { IERC165__factory } from './factories/IERC165__factory';
 export { ERC1155PresetMinterPauser__factory } from './factories/ERC1155PresetMinterPauser__factory';

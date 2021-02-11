@@ -1,12 +1,15 @@
 import { Granter } from 'common/lib/granter';
+import { DropGrant, DropGrantSchema } from 'common/lib/schemas/DropGrantSchema';
 import { DropToken, DropTokenSchema } from 'common/lib/schemas/DropTokenSchema';
 import { createValidator } from 'common/lib/validation';
 import { decode } from 'jsonwebtoken';
 import { getGranter } from 'server/lib/granter';
 import { handler, nope, yup } from 'server/lib/handler';
-import { tokenExists } from 'server/lib/token';
+import { tokenExists, verifyToken } from 'server/lib/token';
 
+// TODO: reduplicate this in ./drop
 const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
+const validateGrant = createValidator<DropGrant>(DropGrantSchema);
 
 export default handler(async function data(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -32,16 +35,27 @@ export default handler(async function data(req, res) {
     return nope(res, 400, error.message);
   }
 
-  // TODO: use.nifti.es service
-  const metadata = {
-    name: 'buddha matt',
-    description: 'some really really really really really really really really long description',
-    image: 'https://themanymatts.lol/images/buddha.png',
-  };
+  // this typecast is safe because of validateTokenWithGrant above
+  const { grant } = verifyToken(token, granter.publicKey) as DropToken;
+
+  try {
+    // conditional shortcircuit for type
+    if (!validateGrant(grant)) throw new Error('unreachable');
+  } catch (error) {
+    return nope(res, 400, error.message);
+  }
+
+  const metadatas = await Promise.all(
+    grant.ids.map((id) =>
+      fetch(
+        `https://use.nifti.es/api/${['eip155:1', granter.tokenAddress, id].join('/')}`,
+      ).then((response) => response.json()),
+    ),
+  );
 
   return yup(res, {
     granter,
-    metadata,
+    metadatas,
     error: used && `This drop has already been claimed.`,
   });
 });

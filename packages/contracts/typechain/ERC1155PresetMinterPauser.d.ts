@@ -2,228 +2,136 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import {
-  ethers,
-  EventFilter,
-  Signer,
-  BigNumber,
-  BigNumberish,
-  PopulatedTransaction,
-} from "ethers";
-import {
-  Contract,
-  ContractTransaction,
-  Overrides,
-  CallOverrides,
-} from "@ethersproject/contracts";
-import { BytesLike } from "@ethersproject/bytes";
-import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
+import { ethers, EventFilter, Signer, BigNumber, BigNumberish, PopulatedTransaction } from 'ethers';
+import { Contract, ContractTransaction, Overrides, CallOverrides } from '@ethersproject/contracts';
+import { BytesLike } from '@ethersproject/bytes';
+import { Listener, Provider } from '@ethersproject/providers';
+import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
+import { TypedEventFilter, TypedEvent, TypedListener } from './commons';
 
 interface ERC1155PresetMinterPauserInterface extends ethers.utils.Interface {
   functions: {
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "MINTER_ROLE()": FunctionFragment;
-    "PAUSER_ROLE()": FunctionFragment;
-    "balanceOf(address,uint256)": FunctionFragment;
-    "balanceOfBatch(address[],uint256[])": FunctionFragment;
-    "burn(address,uint256,uint256)": FunctionFragment;
-    "burnBatch(address,uint256[],uint256[])": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
-    "getRoleMember(bytes32,uint256)": FunctionFragment;
-    "getRoleMemberCount(bytes32)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
-    "isApprovedForAll(address,address)": FunctionFragment;
-    "mint(address,uint256,uint256,bytes)": FunctionFragment;
-    "mintBatch(address,uint256[],uint256[],bytes)": FunctionFragment;
-    "pause()": FunctionFragment;
-    "paused()": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256,uint256,bytes)": FunctionFragment;
-    "setApprovalForAll(address,bool)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "unpause()": FunctionFragment;
-    "uri(uint256)": FunctionFragment;
+    'DEFAULT_ADMIN_ROLE()': FunctionFragment;
+    'MINTER_ROLE()': FunctionFragment;
+    'PAUSER_ROLE()': FunctionFragment;
+    'balanceOf(address,uint256)': FunctionFragment;
+    'balanceOfBatch(address[],uint256[])': FunctionFragment;
+    'burn(address,uint256,uint256)': FunctionFragment;
+    'burnBatch(address,uint256[],uint256[])': FunctionFragment;
+    'getRoleAdmin(bytes32)': FunctionFragment;
+    'getRoleMember(bytes32,uint256)': FunctionFragment;
+    'getRoleMemberCount(bytes32)': FunctionFragment;
+    'grantRole(bytes32,address)': FunctionFragment;
+    'hasRole(bytes32,address)': FunctionFragment;
+    'isApprovedForAll(address,address)': FunctionFragment;
+    'mint(address,uint256,uint256,bytes)': FunctionFragment;
+    'mintBatch(address,uint256[],uint256[],bytes)': FunctionFragment;
+    'pause()': FunctionFragment;
+    'paused()': FunctionFragment;
+    'renounceRole(bytes32,address)': FunctionFragment;
+    'revokeRole(bytes32,address)': FunctionFragment;
+    'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)': FunctionFragment;
+    'safeTransferFrom(address,address,uint256,uint256,bytes)': FunctionFragment;
+    'setApprovalForAll(address,bool)': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'unpause()': FunctionFragment;
+    'uri(uint256)': FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: 'DEFAULT_ADMIN_ROLE', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'MINTER_ROLE', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'PAUSER_ROLE', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [string, BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
+    functionFragment: 'balanceOfBatch',
+    values: [string[], BigNumberish[]],
   ): string;
   encodeFunctionData(
-    functionFragment: "MINTER_ROLE",
-    values?: undefined
+    functionFragment: 'burn',
+    values: [string, BigNumberish, BigNumberish],
   ): string;
   encodeFunctionData(
-    functionFragment: "PAUSER_ROLE",
-    values?: undefined
+    functionFragment: 'burnBatch',
+    values: [string, BigNumberish[], BigNumberish[]],
+  ): string;
+  encodeFunctionData(functionFragment: 'getRoleAdmin', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'getRoleMember', values: [BytesLike, BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'getRoleMemberCount', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'grantRole', values: [BytesLike, string]): string;
+  encodeFunctionData(functionFragment: 'hasRole', values: [BytesLike, string]): string;
+  encodeFunctionData(functionFragment: 'isApprovedForAll', values: [string, string]): string;
+  encodeFunctionData(
+    functionFragment: 'mint',
+    values: [string, BigNumberish, BigNumberish, BytesLike],
   ): string;
   encodeFunctionData(
-    functionFragment: "balanceOf",
-    values: [string, BigNumberish]
+    functionFragment: 'mintBatch',
+    values: [string, BigNumberish[], BigNumberish[], BytesLike],
+  ): string;
+  encodeFunctionData(functionFragment: 'pause', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'paused', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'renounceRole', values: [BytesLike, string]): string;
+  encodeFunctionData(functionFragment: 'revokeRole', values: [BytesLike, string]): string;
+  encodeFunctionData(
+    functionFragment: 'safeBatchTransferFrom',
+    values: [string, string, BigNumberish[], BigNumberish[], BytesLike],
   ): string;
   encodeFunctionData(
-    functionFragment: "balanceOfBatch",
-    values: [string[], BigNumberish[]]
+    functionFragment: 'safeTransferFrom',
+    values: [string, string, BigNumberish, BigNumberish, BytesLike],
   ): string;
-  encodeFunctionData(
-    functionFragment: "burn",
-    values: [string, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "burnBatch",
-    values: [string, BigNumberish[], BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleAdmin",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleMember",
-    values: [BytesLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleMemberCount",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "grantRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isApprovedForAll",
-    values: [string, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "mint",
-    values: [string, BigNumberish, BigNumberish, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "mintBatch",
-    values: [string, BigNumberish[], BigNumberish[], BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
-  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "renounceRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "safeBatchTransferFrom",
-    values: [string, string, BigNumberish[], BigNumberish[], BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "safeTransferFrom",
-    values: [string, string, BigNumberish, BigNumberish, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setApprovalForAll",
-    values: [string, boolean]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
-  encodeFunctionData(functionFragment: "uri", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
+  encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'unpause', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'uri', values: [BigNumberish]): string;
 
-  decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MINTER_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "PAUSER_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "balanceOfBatch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burnBatch", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleMember",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleMemberCount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isApprovedForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "mintBatch", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "safeBatchTransferFrom",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "safeTransferFrom",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setApprovalForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'DEFAULT_ADMIN_ROLE', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'MINTER_ROLE', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'PAUSER_ROLE', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'balanceOfBatch', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burnBatch', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getRoleAdmin', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getRoleMember', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getRoleMemberCount', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'grantRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'hasRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'mint', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'mintBatch', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'pause', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'paused', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'renounceRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'revokeRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'safeBatchTransferFrom', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'uri', data: BytesLike): Result;
 
   events: {
-    "ApprovalForAll(address,address,bool)": EventFragment;
-    "Paused(address)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
-    "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
-    "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
-    "URI(string,uint256)": EventFragment;
-    "Unpaused(address)": EventFragment;
+    'ApprovalForAll(address,address,bool)': EventFragment;
+    'Paused(address)': EventFragment;
+    'RoleAdminChanged(bytes32,bytes32,bytes32)': EventFragment;
+    'RoleGranted(bytes32,address,address)': EventFragment;
+    'RoleRevoked(bytes32,address,address)': EventFragment;
+    'TransferBatch(address,address,address,uint256[],uint256[])': EventFragment;
+    'TransferSingle(address,address,address,uint256,uint256)': EventFragment;
+    'URI(string,uint256)': EventFragment;
+    'Unpaused(address)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "TransferBatch"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "TransferSingle"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "URI"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Paused'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleAdminChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleGranted'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleRevoked'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'TransferBatch'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'TransferSingle'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'URI'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Unpaused'): EventFragment;
 }
 
 export class ERC1155PresetMinterPauser extends Contract {
@@ -231,142 +139,139 @@ export class ERC1155PresetMinterPauser extends Contract {
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  on(event: EventFilter | string, listener: Listener): this;
-  once(event: EventFilter | string, listener: Listener): this;
-  addListener(eventName: EventFilter | string, listener: Listener): this;
-  removeAllListeners(eventName: EventFilter | string): this;
-  removeListener(eventName: any, listener: Listener): this;
+  listeners(eventName?: string): Array<Listener>;
+  off(eventName: string, listener: Listener): this;
+  on(eventName: string, listener: Listener): this;
+  once(eventName: string, listener: Listener): this;
+  removeListener(eventName: string, listener: Listener): this;
+  removeAllListeners(eventName?: string): this;
+
+  listeners<T, G>(eventFilter?: TypedEventFilter<T, G>): Array<TypedListener<T, G>>;
+  off<T, G>(eventFilter: TypedEventFilter<T, G>, listener: TypedListener<T, G>): this;
+  on<T, G>(eventFilter: TypedEventFilter<T, G>, listener: TypedListener<T, G>): this;
+  once<T, G>(eventFilter: TypedEventFilter<T, G>, listener: TypedListener<T, G>): this;
+  removeListener<T, G>(eventFilter: TypedEventFilter<T, G>, listener: TypedListener<T, G>): this;
+  removeAllListeners<T, G>(eventFilter: TypedEventFilter<T, G>): this;
+
+  queryFilter<T, G>(
+    event: TypedEventFilter<T, G>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEvent<T & G>>>;
 
   interface: ERC1155PresetMinterPauserInterface;
 
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<[string]>;
+    'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<[string]>;
 
     MINTER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<[string]>;
+    'MINTER_ROLE()'(overrides?: CallOverrides): Promise<[string]>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    "PAUSER_ROLE()"(overrides?: CallOverrides): Promise<[string]>;
+    'PAUSER_ROLE()'(overrides?: CallOverrides): Promise<[string]>;
 
-    balanceOf(
+    balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    'balanceOf(address,uint256)'(
       account: string,
       id: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "balanceOf(address,uint256)"(
-      account: string,
-      id: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[BigNumber]>;
 
     balanceOfBatch(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[BigNumber[]]>;
 
-    "balanceOfBatch(address[],uint256[])"(
+    'balanceOfBatch(address[],uint256[])'(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[BigNumber[]]>;
 
     burn(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "burn(address,uint256,uint256)"(
+    'burn(address,uint256,uint256)'(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     burnBatch(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "burnBatch(address,uint256[],uint256[])"(
+    'burnBatch(address,uint256[],uint256[])'(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
 
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
 
     getRoleMember(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[string]>;
 
-    "getRoleMember(bytes32,uint256)"(
+    'getRoleMember(bytes32,uint256)'(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[string]>;
 
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     grantRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "grantRole(bytes32,address)"(
+    'grantRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    "hasRole(bytes32,address)"(
+    'hasRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[boolean]>;
 
     isApprovedForAll(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[boolean]>;
 
-    "isApprovedForAll(address,address)"(
+    'isApprovedForAll(address,address)'(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[boolean]>;
 
     mint(
@@ -374,15 +279,15 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "mint(address,uint256,uint256,bytes)"(
+    'mint(address,uint256,uint256,bytes)'(
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     mintBatch(
@@ -390,47 +295,47 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "mintBatch(address,uint256[],uint256[],bytes)"(
+    'mintBatch(address,uint256[],uint256[],bytes)'(
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     pause(overrides?: Overrides): Promise<ContractTransaction>;
 
-    "pause()"(overrides?: Overrides): Promise<ContractTransaction>;
+    'pause()'(overrides?: Overrides): Promise<ContractTransaction>;
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
-    "paused()"(overrides?: CallOverrides): Promise<[boolean]>;
+    'paused()'(overrides?: CallOverrides): Promise<[boolean]>;
 
     renounceRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "renounceRole(bytes32,address)"(
+    'renounceRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     revokeRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "revokeRole(bytes32,address)"(
+    'revokeRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     safeBatchTransferFrom(
@@ -439,16 +344,16 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"(
+    'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'(
       from: string,
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     safeTransferFrom(
@@ -457,179 +362,144 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "safeTransferFrom(address,address,uint256,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,uint256,bytes)'(
       from: string,
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
     setApprovalForAll(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    "setApprovalForAll(address,bool)"(
+    'setApprovalForAll(address,bool)'(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<ContractTransaction>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
 
-    "supportsInterface(bytes4)"(
+    'supportsInterface(bytes4)'(
       interfaceId: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[boolean]>;
 
     unpause(overrides?: Overrides): Promise<ContractTransaction>;
 
-    "unpause()"(overrides?: Overrides): Promise<ContractTransaction>;
+    'unpause()'(overrides?: Overrides): Promise<ContractTransaction>;
 
     uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
-    "uri(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    'uri(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
+  'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
   MINTER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  "MINTER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+  'MINTER_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
   PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  "PAUSER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+  'PAUSER_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
-  balanceOf(
+  balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+  'balanceOf(address,uint256)'(
     account: string,
     id: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "balanceOf(address,uint256)"(
-    account: string,
-    id: BigNumberish,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<BigNumber>;
 
   balanceOfBatch(
     accounts: string[],
     ids: BigNumberish[],
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<BigNumber[]>;
 
-  "balanceOfBatch(address[],uint256[])"(
+  'balanceOfBatch(address[],uint256[])'(
     accounts: string[],
     ids: BigNumberish[],
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<BigNumber[]>;
 
   burn(
     account: string,
     id: BigNumberish,
     value: BigNumberish,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "burn(address,uint256,uint256)"(
+  'burn(address,uint256,uint256)'(
     account: string,
     id: BigNumberish,
     value: BigNumberish,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   burnBatch(
     account: string,
     ids: BigNumberish[],
     values: BigNumberish[],
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "burnBatch(address,uint256[],uint256[])"(
+  'burnBatch(address,uint256[],uint256[])'(
     account: string,
     ids: BigNumberish[],
     values: BigNumberish[],
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-  "getRoleAdmin(bytes32)"(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-  getRoleMember(
-    role: BytesLike,
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  "getRoleMember(bytes32,uint256)"(
+  'getRoleMember(bytes32,uint256)'(
     role: BytesLike,
     index: BigNumberish,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<string>;
 
-  getRoleMemberCount(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-  "getRoleMemberCount(bytes32)"(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-  grantRole(
+  grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+  'grantRole(bytes32,address)'(
     role: BytesLike,
     account: string,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "grantRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
 
-  hasRole(
+  'hasRole(bytes32,address)'(
     role: BytesLike,
     account: string,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<boolean>;
 
-  "hasRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  isApprovedForAll(account: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
 
-  isApprovedForAll(
+  'isApprovedForAll(address,address)'(
     account: string,
     operator: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "isApprovedForAll(address,address)"(
-    account: string,
-    operator: string,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<boolean>;
 
   mint(
@@ -637,15 +507,15 @@ export class ERC1155PresetMinterPauser extends Contract {
     id: BigNumberish,
     amount: BigNumberish,
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "mint(address,uint256,uint256,bytes)"(
+  'mint(address,uint256,uint256,bytes)'(
     to: string,
     id: BigNumberish,
     amount: BigNumberish,
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   mintBatch(
@@ -653,47 +523,43 @@ export class ERC1155PresetMinterPauser extends Contract {
     ids: BigNumberish[],
     amounts: BigNumberish[],
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "mintBatch(address,uint256[],uint256[],bytes)"(
+  'mintBatch(address,uint256[],uint256[],bytes)'(
     to: string,
     ids: BigNumberish[],
     amounts: BigNumberish[],
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   pause(overrides?: Overrides): Promise<ContractTransaction>;
 
-  "pause()"(overrides?: Overrides): Promise<ContractTransaction>;
+  'pause()'(overrides?: Overrides): Promise<ContractTransaction>;
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
-  "paused()"(overrides?: CallOverrides): Promise<boolean>;
+  'paused()'(overrides?: CallOverrides): Promise<boolean>;
 
   renounceRole(
     role: BytesLike,
     account: string,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "renounceRole(bytes32,address)"(
+  'renounceRole(bytes32,address)'(
     role: BytesLike,
     account: string,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  revokeRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-  "revokeRole(bytes32,address)"(
+  'revokeRole(bytes32,address)'(
     role: BytesLike,
     account: string,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   safeBatchTransferFrom(
@@ -702,16 +568,16 @@ export class ERC1155PresetMinterPauser extends Contract {
     ids: BigNumberish[],
     amounts: BigNumberish[],
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"(
+  'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'(
     from: string,
     to: string,
     ids: BigNumberish[],
     amounts: BigNumberish[],
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   safeTransferFrom(
@@ -720,179 +586,145 @@ export class ERC1155PresetMinterPauser extends Contract {
     id: BigNumberish,
     amount: BigNumberish,
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "safeTransferFrom(address,address,uint256,uint256,bytes)"(
+  'safeTransferFrom(address,address,uint256,uint256,bytes)'(
     from: string,
     to: string,
     id: BigNumberish,
     amount: BigNumberish,
     data: BytesLike,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
   setApprovalForAll(
     operator: string,
     approved: boolean,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  "setApprovalForAll(address,bool)"(
+  'setApprovalForAll(address,bool)'(
     operator: string,
     approved: boolean,
-    overrides?: Overrides
+    overrides?: Overrides,
   ): Promise<ContractTransaction>;
 
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
-  "supportsInterface(bytes4)"(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
   unpause(overrides?: Overrides): Promise<ContractTransaction>;
 
-  "unpause()"(overrides?: Overrides): Promise<ContractTransaction>;
+  'unpause()'(overrides?: Overrides): Promise<ContractTransaction>;
 
   uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  "uri(uint256)"(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  'uri(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
+    'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
     MINTER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+    'MINTER_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    "PAUSER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+    'PAUSER_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
-    balanceOf(
+    balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    'balanceOf(address,uint256)'(
       account: string,
       id: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "balanceOf(address,uint256)"(
-      account: string,
-      id: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     balanceOfBatch(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber[]>;
 
-    "balanceOfBatch(address[],uint256[])"(
+    'balanceOfBatch(address[],uint256[])'(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber[]>;
 
     burn(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "burn(address,uint256,uint256)"(
+    'burn(address,uint256,uint256)'(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     burnBatch(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "burnBatch(address,uint256[],uint256[])"(
+    'burnBatch(address,uint256[],uint256[])'(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-    getRoleMember(
+    getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    'getRoleMember(bytes32,uint256)'(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<string>;
 
-    "getRoleMember(bytes32,uint256)"(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    grantRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
 
-    grantRole(
+    'grantRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
 
-    hasRole(
+    'hasRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<boolean>;
 
     isApprovedForAll(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<boolean>;
 
-    "isApprovedForAll(address,address)"(
+    'isApprovedForAll(address,address)'(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<boolean>;
 
     mint(
@@ -900,15 +732,15 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "mint(address,uint256,uint256,bytes)"(
+    'mint(address,uint256,uint256,bytes)'(
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     mintBatch(
@@ -916,47 +748,39 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "mintBatch(address,uint256[],uint256[],bytes)"(
+    'mintBatch(address,uint256[],uint256[],bytes)'(
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     pause(overrides?: CallOverrides): Promise<void>;
 
-    "pause()"(overrides?: CallOverrides): Promise<void>;
+    'pause()'(overrides?: CallOverrides): Promise<void>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
-    "paused()"(overrides?: CallOverrides): Promise<boolean>;
+    'paused()'(overrides?: CallOverrides): Promise<boolean>;
 
-    renounceRole(
+    renounceRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+    'renounceRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    revokeRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
 
-    revokeRole(
+    'revokeRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     safeBatchTransferFrom(
@@ -965,16 +789,16 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"(
+    'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'(
       from: string,
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     safeTransferFrom(
@@ -983,231 +807,234 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "safeTransferFrom(address,address,uint256,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,uint256,bytes)'(
       from: string,
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     setApprovalForAll(
       operator: string,
       approved: boolean,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    "setApprovalForAll(address,bool)"(
+    'setApprovalForAll(address,bool)'(
       operator: string,
       approved: boolean,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
-    "supportsInterface(bytes4)"(
+    'supportsInterface(bytes4)'(
       interfaceId: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<boolean>;
 
     unpause(overrides?: CallOverrides): Promise<void>;
 
-    "unpause()"(overrides?: CallOverrides): Promise<void>;
+    'unpause()'(overrides?: CallOverrides): Promise<void>;
 
     uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "uri(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'uri(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
     ApprovalForAll(
       account: string | null,
       operator: string | null,
-      approved: null
-    ): EventFilter;
+      approved: null,
+    ): TypedEventFilter<
+      [string, string, boolean],
+      { account: string; operator: string; approved: boolean }
+    >;
 
-    Paused(account: null): EventFilter;
+    Paused(account: null): TypedEventFilter<[string], { account: string }>;
 
     RoleAdminChanged(
       role: BytesLike | null,
       previousAdminRole: BytesLike | null,
-      newAdminRole: BytesLike | null
-    ): EventFilter;
+      newAdminRole: BytesLike | null,
+    ): TypedEventFilter<
+      [string, string, string],
+      { role: string; previousAdminRole: string; newAdminRole: string }
+    >;
 
     RoleGranted(
       role: BytesLike | null,
       account: string | null,
-      sender: string | null
-    ): EventFilter;
+      sender: string | null,
+    ): TypedEventFilter<
+      [string, string, string],
+      { role: string; account: string; sender: string }
+    >;
 
     RoleRevoked(
       role: BytesLike | null,
       account: string | null,
-      sender: string | null
-    ): EventFilter;
+      sender: string | null,
+    ): TypedEventFilter<
+      [string, string, string],
+      { role: string; account: string; sender: string }
+    >;
 
     TransferBatch(
       operator: string | null,
       from: string | null,
       to: string | null,
       ids: null,
-      values: null
-    ): EventFilter;
+      values: null,
+    ): TypedEventFilter<
+      [string, string, string, BigNumber[], BigNumber[]],
+      {
+        operator: string;
+        from: string;
+        to: string;
+        ids: BigNumber[];
+        values: BigNumber[];
+      }
+    >;
 
     TransferSingle(
       operator: string | null,
       from: string | null,
       to: string | null,
       id: null,
-      value: null
-    ): EventFilter;
+      value: null,
+    ): TypedEventFilter<
+      [string, string, string, BigNumber, BigNumber],
+      {
+        operator: string;
+        from: string;
+        to: string;
+        id: BigNumber;
+        value: BigNumber;
+      }
+    >;
 
-    URI(value: null, id: BigNumberish | null): EventFilter;
+    URI(
+      value: null,
+      id: BigNumberish | null,
+    ): TypedEventFilter<[string, BigNumber], { value: string; id: BigNumber }>;
 
-    Unpaused(account: null): EventFilter;
+    Unpaused(account: null): TypedEventFilter<[string], { account: string }>;
   };
 
   estimateGas: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<BigNumber>;
 
     MINTER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'MINTER_ROLE()'(overrides?: CallOverrides): Promise<BigNumber>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "PAUSER_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'PAUSER_ROLE()'(overrides?: CallOverrides): Promise<BigNumber>;
 
-    balanceOf(
+    balanceOf(account: string, id: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    'balanceOf(address,uint256)'(
       account: string,
       id: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "balanceOf(address,uint256)"(
-      account: string,
-      id: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     balanceOfBatch(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
-    "balanceOfBatch(address[],uint256[])"(
+    'balanceOfBatch(address[],uint256[])'(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     burn(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "burn(address,uint256,uint256)"(
+    'burn(address,uint256,uint256)'(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     burnBatch(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "burnBatch(address,uint256[],uint256[])"(
+    'burnBatch(address,uint256[],uint256[])'(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
     getRoleMember(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
-    "getRoleMember(bytes32,uint256)"(
+    'getRoleMember(bytes32,uint256)'(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    grantRole(
+    grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+    'grantRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    hasRole(
+    'hasRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     isApprovedForAll(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
-    "isApprovedForAll(address,address)"(
+    'isApprovedForAll(address,address)'(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     mint(
@@ -1215,15 +1042,15 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "mint(address,uint256,uint256,bytes)"(
+    'mint(address,uint256,uint256,bytes)'(
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     mintBatch(
@@ -1231,47 +1058,39 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "mintBatch(address,uint256[],uint256[],bytes)"(
+    'mintBatch(address,uint256[],uint256[],bytes)'(
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     pause(overrides?: Overrides): Promise<BigNumber>;
 
-    "pause()"(overrides?: Overrides): Promise<BigNumber>;
+    'pause()'(overrides?: Overrides): Promise<BigNumber>;
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "paused()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'paused()'(overrides?: CallOverrides): Promise<BigNumber>;
 
-    renounceRole(
+    renounceRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+    'renounceRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
 
-    revokeRole(
+    'revokeRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     safeBatchTransferFrom(
@@ -1280,16 +1099,16 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"(
+    'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'(
       from: string,
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     safeTransferFrom(
@@ -1298,187 +1117,171 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "safeTransferFrom(address,address,uint256,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,uint256,bytes)'(
       from: string,
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
     setApprovalForAll(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    "setApprovalForAll(address,bool)"(
+    'setApprovalForAll(address,bool)'(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<BigNumber>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "supportsInterface(bytes4)"(
+    'supportsInterface(bytes4)'(
       interfaceId: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     unpause(overrides?: Overrides): Promise<BigNumber>;
 
-    "unpause()"(overrides?: Overrides): Promise<BigNumber>;
+    'unpause()'(overrides?: Overrides): Promise<BigNumber>;
 
     uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "uri(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'uri(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    DEFAULT_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "DEFAULT_ADMIN_ROLE()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     MINTER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    'MINTER_ROLE()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "PAUSER_ROLE()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    'PAUSER_ROLE()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     balanceOf(
       account: string,
       id: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "balanceOf(address,uint256)"(
+    'balanceOf(address,uint256)'(
       account: string,
       id: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     balanceOfBatch(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "balanceOfBatch(address[],uint256[])"(
+    'balanceOfBatch(address[],uint256[])'(
       accounts: string[],
       ids: BigNumberish[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     burn(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "burn(address,uint256,uint256)"(
+    'burn(address,uint256,uint256)'(
       account: string,
       id: BigNumberish,
       value: BigNumberish,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     burnBatch(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "burnBatch(address,uint256[],uint256[])"(
+    'burnBatch(address,uint256[],uint256[])'(
       account: string,
       ids: BigNumberish[],
       values: BigNumberish[],
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getRoleAdmin(bytes32)"(
+    'getRoleAdmin(bytes32)'(
       role: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     getRoleMember(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "getRoleMember(bytes32,uint256)"(
+    'getRoleMember(bytes32,uint256)'(
       role: BytesLike,
       index: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getRoleMemberCount(bytes32)"(
+    'getRoleMemberCount(bytes32)'(
       role: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     grantRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "grantRole(bytes32,address)"(
+    'grantRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     hasRole(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "hasRole(bytes32,address)"(
+    'hasRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "isApprovedForAll(address,address)"(
+    'isApprovedForAll(address,address)'(
       account: string,
       operator: string,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     mint(
@@ -1486,15 +1289,15 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "mint(address,uint256,uint256,bytes)"(
+    'mint(address,uint256,uint256,bytes)'(
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     mintBatch(
@@ -1502,47 +1305,47 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "mintBatch(address,uint256[],uint256[],bytes)"(
+    'mintBatch(address,uint256[],uint256[],bytes)'(
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     pause(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    "pause()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+    'pause()'(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "paused()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    'paused()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "renounceRole(bytes32,address)"(
+    'renounceRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     revokeRole(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "revokeRole(bytes32,address)"(
+    'revokeRole(bytes32,address)'(
       role: BytesLike,
       account: string,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     safeBatchTransferFrom(
@@ -1551,16 +1354,16 @@ export class ERC1155PresetMinterPauser extends Contract {
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"(
+    'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'(
       from: string,
       to: string,
       ids: BigNumberish[],
       amounts: BigNumberish[],
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     safeTransferFrom(
@@ -1569,52 +1372,46 @@ export class ERC1155PresetMinterPauser extends Contract {
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "safeTransferFrom(address,address,uint256,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,uint256,bytes)'(
       from: string,
       to: string,
       id: BigNumberish,
       amount: BigNumberish,
       data: BytesLike,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     setApprovalForAll(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
-    "setApprovalForAll(address,bool)"(
+    'setApprovalForAll(address,bool)'(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
+      overrides?: Overrides,
     ): Promise<PopulatedTransaction>;
 
     supportsInterface(
       interfaceId: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    "supportsInterface(bytes4)"(
+    'supportsInterface(bytes4)'(
       interfaceId: BytesLike,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     unpause(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    "unpause()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+    'unpause()'(overrides?: Overrides): Promise<PopulatedTransaction>;
 
-    uri(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    uri(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "uri(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    'uri(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
