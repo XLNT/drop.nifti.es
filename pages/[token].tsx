@@ -24,7 +24,6 @@ const makeConnector = () =>
   new WalletConnect({
     bridge: 'https://bridge.walletconnect.org',
     qrcodeModal,
-    qrcodeModalOptions: { mobileLinks: ['rainbow', 'trust wallet', 'argent'] },
     clientMeta: {
       name: 'Drop Nifties',
       description: 'Some stickers',
