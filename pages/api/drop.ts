@@ -1,20 +1,14 @@
-import { Granter } from 'common/lib/granter';
 import { makeMessage } from 'common/lib/message';
 import { DropArguments, DropArgumentsSchema } from 'common/lib/schemas/DropArgumentsSchema';
-import { DropGrant, DropGrantSchema } from 'common/lib/schemas/DropGrantSchema';
-import { DropToken, DropTokenSchema } from 'common/lib/schemas/DropTokenSchema';
 import { createValidator } from 'common/lib/validation';
-import { decode } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { executeGrant, validateGrantOnChain } from 'server/lib/chain';
-import { getGranter } from 'server/lib/granter';
+import { executeGrant } from 'server/lib/chain';
 import { handler, nope, yup } from 'server/lib/handler';
 import { digestify, recoverAddress } from 'server/lib/proof';
-import { lockToken, verifyToken } from 'server/lib/token';
+import { lockToken } from 'server/lib/token';
+import { verifyGrantAndGranter } from 'server/lib/verifyGrantAndGranter';
 
 const validateArgs = createValidator<DropArguments>(DropArgumentsSchema);
-const validateTokenWithGrant = createValidator<DropToken>(DropTokenSchema);
-const validateGrant = createValidator<DropGrant>(DropGrantSchema);
 
 export default handler(async function drop(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return nope(res, 400, `<dog fetch meme> No ${req.method}. Only POST.`);
@@ -32,42 +26,12 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
     return nope(res, 400, error.message);
   }
 
+  const { grant, granter, error } = await verifyGrantAndGranter(args.token);
+  if (error) return nope(res, 400, error);
+
   // recover proof to get address
   const message = makeMessage(args.address);
   const to = recoverAddress(digestify(message), args.signature);
-
-  const parsed = decode(args.token);
-
-  try {
-    // conditional shortcircuit for type
-    if (!validateTokenWithGrant(parsed)) throw new Error('unreachable');
-  } catch (error) {
-    return nope(res, 400, error.message);
-  }
-
-  let granter: Granter;
-  try {
-    granter = await getGranter(parsed.iss);
-  } catch (error) {
-    return nope(res, 400, error.message);
-  }
-
-  // this typecast is safe because of validateTokenWithGrant above
-  const { grant } = verifyToken(args.token, granter.publicKey) as DropToken;
-
-  try {
-    // conditional shortcircuit for type
-    if (!validateGrant(grant)) throw new Error('unreachable');
-  } catch (error) {
-    return nope(res, 400, error.message);
-  }
-
-  try {
-    // conditional shortcircuit for type
-    if (!validateGrantOnChain(granter, grant, to)) throw new Error('unreachable');
-  } catch (error) {
-    return nope(res, 400, error.message);
-  }
 
   // here we're happy with the input that's been provided and can send off the transaction
   const tx = await executeGrant(granter, grant, to);

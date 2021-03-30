@@ -81,6 +81,8 @@ export default function Drop() {
     { skip: !token },
   );
 
+  const claimIsDisabled = !data || pageLoading || !!pageError;
+
   const { width, height } = useWindowSize();
 
   const [
@@ -179,11 +181,21 @@ export default function Drop() {
             View on Etherscan
           </Button>
         ) : step === DropStep.SignMessage ? (
-          <Button onClick={handleSign} isLoading={loading} width="full">
+          <Button
+            onClick={handleSign}
+            isLoading={loading}
+            width="full"
+            isDisabled={claimIsDisabled}
+          >
             Prove Ownership
           </Button>
         ) : (
-          <Button onClick={createSession} isLoading={!connector} width="full">
+          <Button
+            onClick={createSession}
+            isLoading={!connector}
+            width="full"
+            isDisabled={claimIsDisabled}
+          >
             Connect Wallet
           </Button>
         )

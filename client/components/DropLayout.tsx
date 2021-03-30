@@ -30,21 +30,16 @@ export function DropLayout({
       )}
       <VStack align="stretch" mx="auto" maxWidth="2xl" pt={4} pb={24} px={6}>
         <HStack as="header" justify="space-between" wrap="wrap" spacing={1}>
-          <Text py={2}>
+          <Box>
             {granter && (
               <Link href={granter.url} isExternal>
                 <Pill prefix={granter.prefix}>{granter.name}</Pill>
               </Link>
             )}
-          </Text>
-          <HStack py={2} spacing={1}>
-            <Text as="span" fontSize="xs" fontFamily="mono">
-              powered by
-            </Text>
-            <Link href="/" isExternal>
-              <Pill prefix="📦">drop.nifti.es</Pill>
-            </Link>
-          </HStack>
+          </Box>
+          <Link href="/" isExternal>
+            <Pill prefix="📦">drop.nifti.es</Pill>
+          </Link>
         </HStack>
         <VStack as="main" align="stretch">
           {children}

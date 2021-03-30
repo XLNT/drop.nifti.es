@@ -110,7 +110,7 @@ export function RenderNifty(props: RenderNiftyProps) {
           {result.metadata?.name}
         </Heading>
       ) : (
-        <Skeleton height={4} width={1 / 2} />
+        <Skeleton height={4} width="50%" />
       )}
 
       {result.metadata?.description ? (

@@ -1,12 +1,13 @@
 import { extendTheme, ThemeOverride } from '@chakra-ui/react';
+import defaultTheme from '@chakra-ui/theme';
 
 const highlightable = { _selection: { backgroundColor: 'highlight' } };
 
 const override: ThemeOverride = {
   fonts: {
-    body: "'DM Sans', sans-serif",
-    heading: "'DM Sans', sans-serif",
-    mono: "'DM Mono', monospace",
+    body: `'DM Sans', ${defaultTheme.fonts.body}`,
+    heading: `'DM Sans', ${defaultTheme.fonts.heading}`,
+    mono: `'DM Mono', ${defaultTheme.fonts.mono}`,
   },
   fontSizes: {
     subtext: '0.75rem',

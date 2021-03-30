@@ -1,7 +1,7 @@
 import ERC1155PresetMinterPauserArtifact from 'common/lib/contracts/ERC1155PresetMinterPauser.json';
 import { Granter } from 'common/lib/granter';
 import { DropGrant, GrantType } from 'common/lib/schemas/DropGrantSchema';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 
 const provider =
   process.env.NODE_ENV === 'development'
@@ -16,19 +16,28 @@ function getContract(address: string) {
 }
 
 // verifies that a grant is valid on-chain and will most likely succeed
-export async function validateGrantOnChain(
-  granter: Pick<Granter, 'tokenAddress'>,
-  grant: DropGrant,
-  to: string,
-) {
+export async function validateGrantForGranter(granter: Granter, grant: DropGrant) {
+  if (granter.tokenIds) {
+    // verify that this granter can manage the token ids in the grant
+    const validIds = granter.tokenIds.map((id) => BigNumber.from(id));
+    const everyTokenIdIsManageable = grant.ids
+      .map((id) => BigNumber.from(id))
+      .every((id) => validIds.some((validId) => validId.eq(id)));
+    if (!everyTokenIdIsManageable) {
+      return `${granter.name} does not have permission to drop ${
+        grant.ids.length > 1 ? 'these tokens' : 'this token'
+      }.`;
+    }
+  }
+
   // const contract = getContract(granter.tokenAddress);
 
   switch (grant.type) {
     case GrantType.Mint: {
-      return true;
+      return;
     }
     case GrantType.Transfer: {
-      return true;
+      return;
     }
     default:
       throw new Error('unreachable');
