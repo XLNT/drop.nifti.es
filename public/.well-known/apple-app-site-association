@@ -12,6 +12,11 @@
             "comment": "Matches any URL whose fragment equals `nul` and instructs the system not to open it as a universal link"
           },
           {
+            "/": "/",
+            "exclude": true,
+            "comment": "Matches root and instructs the system not to open it as a universal link"
+          },
+          {
             "/": "/*",
             "comment": "Matches any URL"
           }
