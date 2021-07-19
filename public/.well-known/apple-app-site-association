@@ -1,0 +1,22 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "ZK7A69QTX4.a.nifti.es.wallet"
+        ],
+        "components": [
+          {
+            "#": "nul",
+            "exclude": true,
+            "comment": "Matches any URL whose fragment equals `nul` and instructs the system not to open it as a universal link"
+          },
+          {
+            "/": "/*",
+            "comment": "Matches any URL"
+          }
+        ]
+      }
+    ]
+  }
+}
