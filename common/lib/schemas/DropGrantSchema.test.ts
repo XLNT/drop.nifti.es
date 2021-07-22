@@ -11,6 +11,7 @@ const mint: MintDropGrant = {
   type: GrantType.Mint,
   ids: ['0x0'],
   amounts: ['0x1'],
+  assetType: 'eip155:1/erc1155:0x28959cf125ccb051e70711d0924a62fb28eaf186',
 };
 
 const mintWithData: MintDropGrant = {
@@ -23,6 +24,7 @@ const transfer: TransferDropGrant = {
   from: '0x0',
   ids: ['0x0'],
   amounts: ['0x1'],
+  assetType: 'eip155:1/erc1155:0x28959cf125ccb051e70711d0924a62fb28eaf186',
 };
 
 const transferWithData = {

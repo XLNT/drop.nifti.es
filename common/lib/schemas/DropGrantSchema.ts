@@ -9,6 +9,7 @@ export interface MintDropGrant {
   type: GrantType.Mint;
   ids: string[];
   amounts: string[];
+  assetType: string;
   data?: string;
 }
 
@@ -17,6 +18,7 @@ export interface TransferDropGrant {
   from: string;
   ids: string[];
   amounts: string[];
+  assetType: string;
   data?: string;
 }
 
@@ -29,9 +31,10 @@ const MintDropGrantSchema: AnySchemaObject = {
     type: { type: 'string', enum: Object.values(GrantType) },
     ids: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
     amounts: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
+    assetType: { type: 'string' },
     data: { type: 'string' },
   },
-  required: ['type', 'ids', 'amounts'],
+  required: ['type', 'ids', 'amounts', 'assetType'],
   additionalProperties: false,
 };
 
@@ -43,9 +46,10 @@ const TransferDropGrantSchema: AnySchemaObject = {
     from: { type: 'string' },
     ids: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
     amounts: { type: 'array', items: { type: 'string', format: 'hex' }, minItems: 1 },
+    assetType: { type: 'string' },
     data: { type: 'string' },
   },
-  required: ['type', 'from', 'ids', 'amounts'],
+  required: ['type', 'from', 'ids', 'amounts', 'assetType'],
   additionalProperties: false,
 };
 
