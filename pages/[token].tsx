@@ -150,40 +150,7 @@ export default function Drop() {
   }, [connector, setAddress, setError]);
 
   return (
-    <DropLayout
-      granter={data?.granter}
-      footer={
-        step === DropStep.Complete ? (
-          <Button
-            as="a"
-            rel="noopener noreferrer"
-            target="_blank"
-            href={`https://etherscan.io/tx/${hash}`}
-            width="full"
-          >
-            View on Etherscan
-          </Button>
-        ) : step === DropStep.Claim ? (
-          <Button
-            onClick={handleDrop}
-            isLoading={loading}
-            width="full"
-            isDisabled={claimIsDisabled}
-          >
-            Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
-          </Button>
-        ) : (
-          <Button
-            onClick={createSession}
-            isLoading={!connector}
-            width="full"
-            isDisabled={claimIsDisabled}
-          >
-            Connect Wallet
-          </Button>
-        )
-      }
-    >
+    <DropLayout granter={data?.granter}>
       {hash && <Confetti width={width} height={height} />}
 
       <VStack spacing={4} align="stretch">
@@ -214,12 +181,43 @@ export default function Drop() {
           >
             Download or connect an Ethereum wallet.
           </Step>
+          {step === DropStep.ConnectWallet && (
+            <Button
+              onClick={createSession}
+              isLoading={!connector}
+              width="full"
+              isDisabled={claimIsDisabled}
+            >
+              Connect Wallet
+            </Button>
+          )}
           <Step number={2} active={step === DropStep.Claim}>
             Claim NFT
           </Step>
+          {step === DropStep.Claim && (
+            <Button
+              onClick={handleDrop}
+              isLoading={loading}
+              width="full"
+              isDisabled={claimIsDisabled}
+            >
+              Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
+            </Button>
+          )}
           <Step number={3} active={step === DropStep.Complete}>
             That&apos;s it!
           </Step>
+          {step === DropStep.Complete && (
+            <Button
+              as="a"
+              rel="noopener noreferrer"
+              target="_blank"
+              href={`https://etherscan.io/tx/${hash}`}
+              width="full"
+            >
+              View on Etherscan
+            </Button>
+          )}
         </VStack>
       </VStack>
     </DropLayout>
