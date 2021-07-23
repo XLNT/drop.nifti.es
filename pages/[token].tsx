@@ -7,7 +7,6 @@ import { ERC1155Metadata, RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
 import { useQuery } from 'client/lib/useQuery';
 import { Granter } from 'common/lib/granter';
-import { makeMessage } from 'common/lib/message';
 import { utils } from 'ethers';
 import { useRouter } from 'next/dist/client/router';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
@@ -67,7 +66,7 @@ const reducer = (state: State, action: Action) => {
 
 enum DropStep {
   ConnectWallet,
-  SignMessage,
+  Claim,
   Complete,
 }
 
@@ -108,7 +107,27 @@ export default function Drop() {
     dispatch({ type: 'reset' });
   }, [connector, startLoading]);
 
-  const step = hash ? DropStep.Complete : address ? DropStep.SignMessage : DropStep.ConnectWallet;
+  const step = hash ? DropStep.Complete : address ? DropStep.Claim : DropStep.ConnectWallet;
+
+  const createSession = useCallback(() => {
+    connector.createSession().catch(setError);
+  }, [connector, setError]);
+
+  const handleDrop = useCallback(async () => {
+    startLoading();
+    try {
+      const response = await fetch('/api/drop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, address }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setHash(data.hash);
+    } catch (error) {
+      setError(error);
+    }
+  }, [address, setError, setHash, startLoading, token]);
 
   useEffect(() => {
     if (!connector) return;
@@ -116,7 +135,8 @@ export default function Drop() {
 
     connector.on('connect', (error, payload) => {
       if (error) return setError(error);
-      setAddress((payload.params as ISessionParams[])[0].accounts[0]);
+      const address = (payload.params as ISessionParams[])[0].accounts[0];
+      setAddress(address);
     });
 
     connector.on('disconnect', (error) => {
@@ -128,43 +148,6 @@ export default function Drop() {
       if (connector.connected) connector.killSession();
     };
   }, [connector, setAddress, setError]);
-
-  const createSession = useCallback(() => {
-    connector.createSession().catch(setError);
-  }, [connector, setError]);
-
-  const handleDrop = useCallback(
-    async (signature: string) => {
-      startLoading();
-      try {
-        const response = await fetch('/api/drop', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, address, signature }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message);
-        setHash(data.hash);
-      } catch (error) {
-        setError(error);
-      }
-    },
-    [address, setError, setHash, startLoading, token],
-  );
-
-  const handleSign = useCallback(async () => {
-    startLoading();
-    try {
-      const signature = await connector.signPersonalMessage([
-        utils.toUtf8Bytes(makeMessage(address)),
-        address,
-      ]);
-      // auto-submit after signature
-      handleDrop(signature);
-    } catch (error) {
-      setError(error);
-    }
-  }, [address, connector, handleDrop, setError, startLoading]);
 
   return (
     <DropLayout
@@ -180,14 +163,14 @@ export default function Drop() {
           >
             View on Etherscan
           </Button>
-        ) : step === DropStep.SignMessage ? (
+        ) : step === DropStep.Claim ? (
           <Button
-            onClick={handleSign}
+            onClick={handleDrop}
             isLoading={loading}
             width="full"
             isDisabled={claimIsDisabled}
           >
-            Prove Ownership
+            Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
           </Button>
         ) : (
           <Button
@@ -231,8 +214,8 @@ export default function Drop() {
           >
             Download or connect an Ethereum wallet.
           </Step>
-          <Step number={2} active={step === DropStep.SignMessage}>
-            Prove ownership of your address
+          <Step number={2} active={step === DropStep.Claim}>
+            Claim NFT
           </Step>
           <Step number={3} active={step === DropStep.Complete}>
             That&apos;s it!
