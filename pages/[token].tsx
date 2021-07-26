@@ -192,7 +192,7 @@ export default function Drop() {
             </Button>
           )}
           <Step number={2} active={step === DropStep.Claim}>
-            Claim NFT
+            Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
           </Step>
           {step === DropStep.Claim && (
             <Button
