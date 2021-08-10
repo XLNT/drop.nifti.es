@@ -6,7 +6,7 @@ import { BigNumber, ethers } from 'ethers';
 const provider =
   process.env.NODE_ENV === 'development'
     ? new ethers.providers.JsonRpcProvider()
-    : new ethers.providers.InfuraProvider('mainnet', process.env.INFURA_PROJECT_ID);
+    : new ethers.providers.InfuraProvider('mainnet', process.env.NEXT_PUBLIC_INFURA_ID);
 const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider);
 
 const EMPTY_DATA = ethers.utils.arrayify(0);

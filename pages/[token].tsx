@@ -1,17 +1,15 @@
 import { Button, Divider, Text, VStack } from '@chakra-ui/react';
-import WalletConnect from '@walletconnect/client';
-import qrcodeModal from '@walletconnect/qrcode-modal';
-import type { ISessionParams } from '@walletconnect/types';
 import { DropLayout } from 'client/components/DropLayout';
 import { ERC1155Metadata, RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
 import { useQuery } from 'client/lib/useQuery';
 import { Granter } from 'common/lib/granter';
-import { utils } from 'ethers';
 import { useRouter } from 'next/dist/client/router';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import Script from 'next/script';
+import { useCallback, useMemo, useReducer } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import Web3Modal from 'web3modal';
 
 interface DropPageData {
   granter: Pick<Granter, 'prefix' | 'name' | 'url'>;
@@ -19,20 +17,7 @@ interface DropPageData {
   metadatas: { metadata: ERC1155Metadata }[];
 }
 
-const makeConnector = () =>
-  new WalletConnect({
-    bridge: 'https://bridge.walletconnect.org',
-    qrcodeModal,
-    clientMeta: {
-      name: 'Drop Nifties',
-      description: 'Some stickers',
-      url: 'https://drop.nifti.es',
-      icons: ['https://drop.nifti.es/favicon.png'],
-    },
-  });
-
 interface State {
-  connector: WalletConnect;
   address?: string;
   signature?: string;
   hash?: string;
@@ -58,7 +43,7 @@ const reducer = (state: State, action: Action) => {
     case 'startLoading':
       return { ...state, loading: true, error: undefined };
     case 'reset':
-      return { loading: false, connector: makeConnector() };
+      return { loading: false };
     default:
       return state;
   }
@@ -74,7 +59,11 @@ export default function Drop() {
   const router = useRouter();
   const token = router.query.token as string;
 
-  const { data, loading: pageLoading, error: pageError } = useQuery<DropPageData>(
+  const {
+    data,
+    loading: pageLoading,
+    error: pageError,
+  } = useQuery<DropPageData>(
     '/api/data',
     useMemo(() => ({ token }), [token]),
     { skip: !token },
@@ -84,10 +73,11 @@ export default function Drop() {
 
   const { width, height } = useWindowSize();
 
-  const [
-    { connector, address, hash, loading: dropLoading, error: dropError },
-    dispatch,
-  ] = useReducer(reducer, undefined, () => ({ loading: false, connector: makeConnector() }));
+  const [{ address, hash, loading: dropLoading, error: dropError }, dispatch] = useReducer(
+    reducer,
+    undefined,
+    () => ({ loading: false }),
+  );
 
   const error = pageError || dropError;
   const loading = pageLoading || dropLoading;
@@ -99,19 +89,31 @@ export default function Drop() {
   );
   const setHash = useCallback((hash: string) => dispatch({ type: 'setHash', hash }), []);
   const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
-  const reset = useCallback(async () => {
-    if (connector.connected) {
-      startLoading();
-      await connector.killSession();
-    }
-    dispatch({ type: 'reset' });
-  }, [connector, startLoading]);
+  const reset = useCallback(async () => dispatch({ type: 'reset' }), []);
 
   const step = hash ? DropStep.Complete : address ? DropStep.Claim : DropStep.ConnectWallet;
 
-  const createSession = useCallback(() => {
-    connector.createSession().catch(setError);
-  }, [connector, setError]);
+  const connectAccount = useCallback(async () => {
+    startLoading();
+    try {
+      const modal = new Web3Modal({
+        network: 'mainnet',
+        cacheProvider: true,
+        providerOptions: {
+          walletconnect: {
+            package: (window as any).WalletConnectProvider.default,
+            options: { infuraId: process.env.NEXT_PUBLIC_INFURA_ID },
+          },
+        },
+      });
+      const provider = await modal.connect();
+      const account = provider.selectedAddress ?? provider.accounts?.[0] ?? null;
+      if (!account) throw new Error(`Unable to find selected account.`);
+      setAddress(account);
+    } catch (error) {
+      setError(error);
+    }
+  }, [setAddress, setError, startLoading]);
 
   const handleDrop = useCallback(async () => {
     startLoading();
@@ -129,28 +131,10 @@ export default function Drop() {
     }
   }, [address, setError, setHash, startLoading, token]);
 
-  useEffect(() => {
-    if (!connector) return;
-    if (connector.connected) return setAddress(connector.accounts[0]);
-
-    connector.on('connect', (error, payload) => {
-      if (error) return setError(error);
-      const address = (payload.params as ISessionParams[])[0].accounts[0];
-      setAddress(address);
-    });
-
-    connector.on('disconnect', (error) => {
-      setAddress(undefined);
-      if (error) return setError(error);
-    });
-
-    return () => {
-      if (connector.connected) connector.killSession();
-    };
-  }, [connector, setAddress, setError]);
-
   return (
     <DropLayout granter={data?.granter}>
+      <Script src="https://unpkg.com/@walletconnect/web3-provider@1.5.3" strategy="lazyOnload" />
+
       {hash && <Confetti width={width} height={height} />}
 
       <VStack spacing={4} align="stretch">
@@ -182,12 +166,7 @@ export default function Drop() {
             Download or connect an Ethereum wallet.
           </Step>
           {step === DropStep.ConnectWallet && (
-            <Button
-              onClick={createSession}
-              isLoading={!connector}
-              width="full"
-              isDisabled={claimIsDisabled}
-            >
+            <Button onClick={connectAccount} width="full" isDisabled={claimIsDisabled}>
               Connect Wallet
             </Button>
           )}
