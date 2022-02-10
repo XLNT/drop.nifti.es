@@ -3,7 +3,7 @@ import { isValidMotionProp, motion } from 'framer-motion';
 import { PropsWithChildren, ReactNode } from 'react';
 
 // 1. Create a custom motion component from Box
-const MotionHStack = motion.custom(
+const MotionHStack = motion(
   forwardRef((props, ref) => {
     const chakraProps = Object.fromEntries(
       // do not pass framer props to DOM element

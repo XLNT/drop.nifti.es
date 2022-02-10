@@ -1,6 +1,7 @@
 import { Button, Divider, Text, VStack } from '@chakra-ui/react';
+import type { NftMetadata } from '@zoralabs/nft-metadata';
 import { DropLayout } from 'client/components/DropLayout';
-import { ERC1155Metadata, RenderNifty } from 'client/components/RenderNifty';
+import { RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
 import { useQuery } from 'client/lib/useQuery';
 import { Granter } from 'common/lib/granter';
@@ -13,8 +14,7 @@ import Web3Modal from 'web3modal';
 
 interface DropPageData {
   granter: Pick<Granter, 'prefix' | 'name' | 'url'>;
-  // TODO: use typings from use.nifti.es here
-  metadatas: { metadata: ERC1155Metadata }[];
+  metadata: NftMetadata;
 }
 
 interface State {
@@ -102,7 +102,7 @@ export default function Drop() {
         providerOptions: {
           walletconnect: {
             package: (window as any).WalletConnectProvider.default,
-            options: { infuraId: process.env.NEXT_PUBLIC_INFURA_ID },
+            options: { infuraId: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID },
           },
         },
       });
@@ -138,7 +138,7 @@ export default function Drop() {
       {hash && <Confetti width={width} height={height} />}
 
       <VStack spacing={4} align="stretch">
-        <RenderNifty metadata={data?.metadatas?.[0]?.metadata} />
+        <RenderNifty metadata={data?.metadata} />
 
         <Divider />
 
@@ -171,7 +171,7 @@ export default function Drop() {
             </Button>
           )}
           <Step number={2} active={step === DropStep.Claim}>
-            Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
+            Claim {data?.metadata?.name ?? 'NFT'}
           </Step>
           {step === DropStep.Claim && (
             <Button
@@ -180,7 +180,7 @@ export default function Drop() {
               width="full"
               isDisabled={claimIsDisabled}
             >
-              Claim {data?.metadatas?.[0]?.metadata.name ?? 'NFT'}
+              Claim {data?.metadata?.name ?? 'NFT'}
             </Button>
           )}
           <Step number={3} active={step === DropStep.Complete}>

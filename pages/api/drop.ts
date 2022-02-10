@@ -1,3 +1,4 @@
+import { CODES } from 'common/lib/codes';
 import { DropArguments, DropArgumentsSchema } from 'common/lib/schemas/DropArgumentsSchema';
 import { createValidator } from 'common/lib/validation';
 import { ethers } from 'ethers';
@@ -17,22 +18,34 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
     address: req.body.address as string,
   };
 
+  const isCode = Object.keys(CODES).includes(args.token);
+
+  if (!isCode) {
+    // token based
+    // check argument
+    try {
+      if (!validateArgs(args)) throw new Error('unreachable');
+    } catch (error) {
+      return nope(res, 400, error.message);
+    }
+  }
+
   try {
-    // conditional shortcircuit for type
-    if (!validateArgs(args)) throw new Error('unreachable');
     if (!ethers.utils.isAddress(args.address)) throw new Error('Invalid address');
   } catch (error) {
     return nope(res, 400, error.message);
   }
 
-  const { grant, granter, error } = await verifyGrantAndGranter(args.token);
+  const { grant, error } = await verifyGrantAndGranter(args.token);
   if (error) return nope(res, 400, error);
 
   // here we're happy with the input that's been provided and can send off the transaction
-  const tx = await executeGrant(granter, grant, args.address);
+  const tx = await executeGrant(grant, args.address);
 
-  // lock the token after the tx is broadcast
-  await lockToken(args.token);
+  if (!isCode) {
+    // lock the token after the tx is broadcast
+    await lockToken(args.token);
+  }
 
   return yup(res, { hash: tx.hash });
 });

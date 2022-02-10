@@ -113,7 +113,7 @@ export function useDrops(
   }, [container, loop]);
 
   useEffect(() => {
-    const isTouchInteraction = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+    const isTouchInteraction = 'ontouchstart' in window || (navigator as any).msMaxTouchPoints;
 
     const pointerStart = isTouchInteraction ? 'touchstart' : 'mousedown';
     const pointerEnd = isTouchInteraction ? 'touchend' : 'mouseup';

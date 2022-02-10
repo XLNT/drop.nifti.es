@@ -16,16 +16,11 @@ export default handler(async function data(req, res) {
 
   try {
     const { grant, granter, error } = await verifyGrantAndGranter(token);
-
-    const metadatas = await Promise.all(
-      grant.ids
-        .map((id) => ['eip155:1', `erc1155:${granter.tokenAddress}`, id].join('/'))
-        .map((id) => fetcher(`https://use.nifti.es/api/${id}`)),
-    );
+    const metadata = await fetcher(`https://use.nifti.es/api/${grant.id}`);
 
     res.setHeader('Cache-Control', `s-maxage=${60 * 60}`);
 
-    return yup(res, { granter, metadatas, error });
+    return yup(res, { granter, metadata, error });
   } catch (error) {
     return nope(res, 400, error.message);
   }

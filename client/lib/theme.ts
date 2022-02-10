@@ -3,6 +3,7 @@ import defaultTheme from '@chakra-ui/theme';
 
 const highlightable = { _selection: { backgroundColor: 'highlight' } };
 
+// @ts-expect-error
 const override: ThemeOverride = {
   fonts: {
     body: `'DM Sans', ${defaultTheme.fonts.body}`,
@@ -60,8 +61,14 @@ const override: ThemeOverride = {
   },
   components: {
     Heading: {
-      baseStyle: {
+      _baseStyle: {
         ...highlightable,
+      },
+      get baseStyle() {
+        return this._baseStyle;
+      },
+      set baseStyle(value) {
+        this._baseStyle = value;
       },
     },
     Link: {
