@@ -1,4 +1,4 @@
-import { Heading, Image, Text, VStack } from '@chakra-ui/react';
+import { Box, Heading, Image, Text, VStack } from '@chakra-ui/react';
 import { NftMetadata } from '@zoralabs/nft-metadata';
 import { useMemo } from 'react';
 
@@ -15,6 +15,14 @@ function RenderNiftyAsset({
 
   if (!metadata) {
     return <Skeleton {...delegated} />;
+  }
+
+  if (metadata.imageURLMimeType.startsWith('video/')) {
+    return (
+      <Box as="video" objectFit="contain" objectPosition="center" autoPlay muted controls>
+        <source src={metadata.imageURL} type={metadata.imageURLMimeType} />
+      </Box>
+    );
   }
 
   return (
