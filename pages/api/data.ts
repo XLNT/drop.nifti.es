@@ -16,7 +16,7 @@ export default handler(async function data(req, res) {
   const assetId = req.query.assetId as string;
 
   try {
-    const { grant, granter, error } = await verifyGrantAndGranter(issuer, assetId);
+    const { grant, granter, error } = verifyGrantAndGranter(issuer, assetId);
     const metadata = await fetcher(`https://use.nifti.es/api/${grant.id}`);
 
     res.setHeader('Cache-Control', `s-maxage=${60 * 60}`);

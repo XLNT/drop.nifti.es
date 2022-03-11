@@ -1,5 +1,6 @@
 import { AssetId } from 'caip';
 import { Grant } from 'common/lib/grant';
+import { DefenderRelayProvider, DefenderRelaySigner } from 'defender-relay-client/lib/ethers';
 import { ethers, Signer } from 'ethers';
 
 const EMPTY_DATA = ethers.utils.arrayify(0);
@@ -15,13 +16,22 @@ function getContract(address: string, signer: Signer) {
   );
 }
 
+function getCredentials(chainId: string) {
+  switch (chainId) {
+    case '1':
+      return { apiKey: process.env.RELAY_KEY_MAINNET, apiSecret: process.env.RELAY_SECRET_MAINNET };
+    case '137':
+      return { apiKey: process.env.RELAY_KEY_POLYGON, apiSecret: process.env.RELAY_SECRET_POLYGON };
+    default:
+      throw new Error(`Invalid chainId: ${chainId}`);
+  }
+}
+
 export async function executeGrant(grant: Grant, to: string) {
   const assetId = new AssetId(grant.id);
-  const provider = new ethers.providers.InfuraProvider(
-    parseInt(assetId.chainId.reference),
-    process.env.NEXT_PUBLIC_INFURA_PROJECT_ID,
-  );
-  const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider);
+  const credentials = getCredentials(assetId.chainId.reference);
+  const provider = new DefenderRelayProvider(credentials);
+  const signer = new DefenderRelaySigner(credentials, provider, { speed: 'fast' });
   const contract = getContract(assetId.assetName.reference, signer);
 
   console.log(assetId.chainId.reference, to, grant.uri, contract.address);

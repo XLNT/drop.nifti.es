@@ -3,10 +3,10 @@ import { Granter } from 'common/lib/granter';
 
 import { getGranter, getGrantForGranter, validateIdForGranter } from './granter';
 
-export async function verifyGrantAndGranter(
+export function verifyGrantAndGranter(
   issuer: string,
   assetId: string,
-): Promise<{ grant: Grant; granter: Granter; error?: string }> {
+): { grant: Grant; granter: Granter; error?: string } {
   // pull granter info
   const granter = getGranter(issuer);
 

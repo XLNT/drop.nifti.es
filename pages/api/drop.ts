@@ -21,7 +21,7 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
     return nope(res, 400, error.message);
   }
 
-  const { grant, granter, error } = await verifyGrantAndGranter(args.issuer, args.assetId);
+  const { grant, granter, error } = verifyGrantAndGranter(args.issuer, args.assetId);
   if (error) return nope(res, 400, error);
 
   // TODO: verify args.code against granter pk

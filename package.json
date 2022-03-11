@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.8.1",
     "@zoralabs/nft-metadata": "^1.2.3",
     "caip": "^1.0.0",
+    "defender-relay-client": "^1.18.0",
     "ethers": "^5.6.0",
     "framer-motion": "^6.2.8",
     "next": "^12.1.0",
