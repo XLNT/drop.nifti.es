@@ -1,17 +1,31 @@
-import { Granter } from 'common/lib/granter';
-import { query as q } from 'faunadb';
-
-import { client } from './db';
+import { Grant } from 'common/lib/grant';
+import { Granter, GRANTERS } from 'common/lib/granter';
 
 // TODO: look up publicKey by issuer - some type of dashboard to add public keys, idk
-export async function getGranter(issuer: string): Promise<Granter> {
-  try {
-    const result = await client.query<{ data: Granter }>(
-      q.Get(q.Match(q.Index('granters_by_issuer'), issuer)),
-    );
-
-    return result.data;
-  } catch (error) {
+export function getGranter(issuer: string): Granter {
+  if (!GRANTERS[issuer]) {
     throw new Error(`Invalid issuer — '${issuer}' hasn't registered with drop.nifti.es.`);
   }
+
+  return GRANTERS[issuer];
+}
+
+export function validateIdForGranter(granter: Granter, id: string): string | undefined {
+  // verify that granter has dominion over this assetId
+  if (!granter.ids.includes(id)) {
+    return `${granter.name} does not have permission to drop this token.`;
+  }
+}
+
+// generate a specific grant given an issuer and a specific id
+export function getGrantForGranter(granter: Granter, id: string): Grant {
+  if (['matt', 'stephenson'].includes(granter.issuer)) {
+    return { id, amount: 100 };
+  }
+
+  if (granter.issuer === 'toby') {
+    return { id, uri: 'ipfs://QmZPqS2u4TkDHvGhTLMGnaHghVjMjnsAWgpUCkEDCkTNTx' };
+  }
+
+  return { id };
 }

@@ -4,7 +4,7 @@ module.exports = {
       {
         source: '/code/:code',
         destination: '/:code',
-        permanent: false,
+        permanent: true,
       },
     ];
   },

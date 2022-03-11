@@ -12,15 +12,16 @@ export default handler(async function data(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return nope(res, 400, `No ${req.method}. Only GET.`);
 
-  const token = req.query.token as string;
+  const issuer = req.query.issuer as string;
+  const assetId = req.query.assetId as string;
 
   try {
-    const { grant, granter, error } = await verifyGrantAndGranter(token);
+    const { grant, granter, error } = await verifyGrantAndGranter(issuer, assetId);
     const metadata = await fetcher(`https://use.nifti.es/api/${grant.id}`);
 
     res.setHeader('Cache-Control', `s-maxage=${60 * 60}`);
 
-    return yup(res, { granter, metadata, error });
+    return yup(res, { grant, granter, metadata, error });
   } catch (error) {
     return nope(res, 400, error.message);
   }

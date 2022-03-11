@@ -1,8 +1,6 @@
 import { AssetId } from 'caip';
-import { Granter } from 'common/lib/granter';
-import { DropGrant } from 'common/lib/schemas/DropGrantSchema';
-import { BigNumber, ethers, Signer } from 'ethers';
-import { getAddress } from 'ethers/lib/utils';
+import { Grant } from 'common/lib/grant';
+import { ethers, Signer } from 'ethers';
 
 const EMPTY_DATA = ethers.utils.arrayify(0);
 
@@ -17,28 +15,7 @@ function getContract(address: string, signer: Signer) {
   );
 }
 
-// verifies that a grant is valid on-chain and will most likely succeed
-export async function validateGrantForGranter(granter: Granter, grant: DropGrant) {
-  const assetId = new AssetId(grant.id);
-
-  // verify that granter has dominion over this tokenContract
-  if (getAddress(granter.tokenAddress) !== getAddress(assetId.assetName.reference)) {
-    return `${granter.name} does not have permission to drop this token.`;
-  }
-
-  if (granter.tokenIds) {
-    // verify that this granter can manage the token ids in the grant
-    const tokenId = BigNumber.from(assetId.tokenId);
-    const validIds = granter.tokenIds.map((id) => BigNumber.from(id));
-    const canManageTokenId = validIds.some((validId) => validId.eq(tokenId));
-
-    if (!canManageTokenId) {
-      return `${granter.name} does not have permission to drop this token.`;
-    }
-  }
-}
-
-export async function executeGrant(grant: DropGrant, to: string) {
+export async function executeGrant(grant: Grant, to: string) {
   const assetId = new AssetId(grant.id);
   const provider = new ethers.providers.InfuraProvider(
     parseInt(assetId.chainId.reference),
@@ -46,6 +23,8 @@ export async function executeGrant(grant: DropGrant, to: string) {
   );
   const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider);
   const contract = getContract(assetId.assetName.reference, signer);
+
+  console.log(assetId.chainId.reference, to, grant.uri, contract.address);
 
   switch (assetId.assetName.namespace) {
     case 'eip721': {

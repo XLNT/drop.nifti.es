@@ -9,12 +9,6 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* eslint-disable-next-line @next/next/no-css-tags */}
-        <link
-          key="google"
-          href="//fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap"
-          rel="stylesheet"
-        />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
         <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png" />
@@ -49,7 +43,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           // ],
         }}
         twitter={{
-          handle: '@mattgcondon',
+          handle: '@1ofthemanymatts',
           cardType: 'summary_large_image',
         }}
       />

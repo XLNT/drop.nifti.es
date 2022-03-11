@@ -1,9 +1,12 @@
 import { Button, Divider, Text, VStack } from '@chakra-ui/react';
 import type { NftMetadata } from '@zoralabs/nft-metadata';
+import { AssetId } from 'caip';
 import { DropLayout } from 'client/components/DropLayout';
 import { RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
+import { explorerBaseURI, explorerName } from 'client/lib/explorer';
 import { useQuery } from 'client/lib/useQuery';
+import { Grant } from 'common/lib/grant';
 import { Granter } from 'common/lib/granter';
 import { useRouter } from 'next/dist/client/router';
 import Script from 'next/script';
@@ -13,6 +16,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import Web3Modal from 'web3modal';
 
 interface DropPageData {
+  grant: Grant;
   granter: Pick<Granter, 'prefix' | 'name' | 'url'>;
   metadata: NftMetadata;
 }
@@ -57,7 +61,8 @@ enum DropStep {
 
 export default function Drop() {
   const router = useRouter();
-  const token = router.query.token as string;
+  const issuer = router.query.issuer as string;
+  const assetId = ((router.query.assetId as string[]) ?? []).join('/');
 
   const {
     data,
@@ -65,11 +70,16 @@ export default function Drop() {
     error: pageError,
   } = useQuery<DropPageData>(
     '/api/data',
-    useMemo(() => ({ token }), [token]),
-    { skip: !token },
+    useMemo(() => ({ issuer, assetId }), [assetId, issuer]),
+    { skip: !issuer },
   );
 
   const claimIsDisabled = !data || pageLoading || !!pageError;
+
+  const chainId = useMemo(() => {
+    if (!data?.grant) return null;
+    return new AssetId(data.grant.id).chainId.reference;
+  }, [data]);
 
   const { width, height } = useWindowSize();
 
@@ -121,7 +131,8 @@ export default function Drop() {
       const response = await fetch('/api/drop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, address }),
+        body: JSON.stringify({ issuer, assetId, address }),
+        // TODO: code
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
@@ -129,7 +140,7 @@ export default function Drop() {
     } catch (error) {
       setError(error);
     }
-  }, [address, setError, setHash, startLoading, token]);
+  }, [address, issuer, setError, setHash, startLoading, assetId]);
 
   return (
     <DropLayout granter={data?.granter}>
@@ -191,10 +202,10 @@ export default function Drop() {
               as="a"
               rel="noopener noreferrer"
               target="_blank"
-              href={`https://etherscan.io/tx/${hash}`}
+              href={`${explorerBaseURI(chainId)}/tx/${hash}`}
               width="full"
             >
-              View on Etherscan
+              View on {explorerName(chainId)}
             </Button>
           )}
         </VStack>
