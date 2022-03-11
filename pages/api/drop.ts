@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { authenticator } from 'otplib';
 import { executeGrant } from 'server/lib/chain';
 import { handler, nope, yup } from 'server/lib/handler';
 import { verifyGrantAndGranter } from 'server/lib/verifyGrantAndGranter';
@@ -20,10 +21,12 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
     return nope(res, 400, error.message);
   }
 
-  const { grant, error } = await verifyGrantAndGranter(args.issuer, args.assetId);
+  const { grant, granter, error } = await verifyGrantAndGranter(args.issuer, args.assetId);
   if (error) return nope(res, 400, error);
 
   // TODO: verify args.code against granter pk
+  const isValid = authenticator.check(args.code, granter.secret);
+  if (!isValid) return nope(res, 400, `${args.code} is an invalid code at this time.`);
 
   // here we're happy with the input that's been provided and can send off the transaction
   // const tx = await executeGrant(grant, args.address);

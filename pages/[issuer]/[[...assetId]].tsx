@@ -11,9 +11,14 @@ import { Granter } from 'common/lib/granter';
 import { useRouter } from 'next/dist/client/router';
 import Script from 'next/script';
 import { useCallback, useMemo, useReducer } from 'react';
+import AuthCode from 'react-auth-code-input';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import Web3Modal from 'web3modal';
+
+import authStyles from '../../client/components/auth.module.css';
+
+const CODE_LENGTH = 6;
 
 interface DropPageData {
   grant: Grant;
@@ -23,7 +28,7 @@ interface DropPageData {
 
 interface State {
   address?: string;
-  signature?: string;
+  code?: string;
   hash?: string;
   loading: boolean;
   error?: Error;
@@ -31,6 +36,7 @@ interface State {
 
 type Action =
   | { type: 'setAddress'; address: string }
+  | { type: 'setCode'; code: string }
   | { type: 'setError'; error: Error }
   | { type: 'startLoading' }
   | { type: 'setHash'; hash: string }
@@ -40,6 +46,8 @@ const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'setAddress':
       return { ...state, address: action.address, loading: false, error: undefined };
+    case 'setCode':
+      return { ...state, code: action.code };
     case 'setHash':
       return { ...state, hash: action.hash, loading: false, error: undefined };
     case 'setError':
@@ -74,8 +82,6 @@ export default function Drop() {
     { skip: !issuer },
   );
 
-  const claimIsDisabled = !data || pageLoading || !!pageError;
-
   const chainId = useMemo(() => {
     if (!data?.grant) return null;
     return new AssetId(data.grant.id).chainId.reference;
@@ -83,11 +89,14 @@ export default function Drop() {
 
   const { width, height } = useWindowSize();
 
-  const [{ address, hash, loading: dropLoading, error: dropError }, dispatch] = useReducer(
+  const [{ address, hash, code, loading: dropLoading, error: dropError }, dispatch] = useReducer(
     reducer,
     undefined,
     () => ({ loading: false }),
   );
+
+  const connectIsDisabled = !data || pageLoading || !!pageError;
+  const claimIsDisabled = !data || !address || !code || pageLoading || !!pageError;
 
   const error = pageError || dropError;
   const loading = pageLoading || dropLoading;
@@ -97,6 +106,7 @@ export default function Drop() {
     (address: string) => dispatch({ type: 'setAddress', address }),
     [],
   );
+  const setCode = useCallback((code: string) => dispatch({ type: 'setCode', code }), []);
   const setHash = useCallback((hash: string) => dispatch({ type: 'setHash', hash }), []);
   const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
   const reset = useCallback(async () => dispatch({ type: 'reset' }), []);
@@ -131,8 +141,7 @@ export default function Drop() {
       const response = await fetch('/api/drop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ issuer, assetId, address }),
-        // TODO: code
+        body: JSON.stringify({ issuer, assetId, code, address }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
@@ -140,7 +149,7 @@ export default function Drop() {
     } catch (error) {
       setError(error);
     }
-  }, [address, issuer, setError, setHash, startLoading, assetId]);
+  }, [startLoading, issuer, assetId, code, address, setHash, setError]);
 
   return (
     <DropLayout granter={data?.granter}>
@@ -160,7 +169,6 @@ export default function Drop() {
           </>
         )}
 
-        {/* TODO: some 3-step process with greyed-out steps, etc */}
         <VStack spacing={4} align="stretch">
           <Step
             number={1}
@@ -177,7 +185,7 @@ export default function Drop() {
             Download or connect an Ethereum wallet.
           </Step>
           {step === DropStep.ConnectWallet && (
-            <Button onClick={connectAccount} width="full" isDisabled={claimIsDisabled}>
+            <Button onClick={connectAccount} width="full" isDisabled={connectIsDisabled}>
               Connect Wallet
             </Button>
           )}
@@ -185,14 +193,29 @@ export default function Drop() {
             Claim {data?.metadata?.name ?? 'NFT'}
           </Step>
           {step === DropStep.Claim && (
-            <Button
-              onClick={handleDrop}
-              isLoading={loading}
-              width="full"
-              isDisabled={claimIsDisabled}
-            >
-              Claim {data?.metadata?.name ?? 'NFT'}
-            </Button>
+            <VStack spacing={4}>
+              <AuthCode
+                length={CODE_LENGTH}
+                onChange={(value) => {
+                  if (value?.length === CODE_LENGTH) {
+                    setCode(value);
+                  } else {
+                    setCode(undefined);
+                  }
+                }}
+                allowedCharacters="numeric"
+                containerClassName={authStyles.container}
+                inputClassName={authStyles.input}
+              />
+              <Button
+                onClick={handleDrop}
+                isLoading={loading}
+                width="full"
+                isDisabled={claimIsDisabled}
+              >
+                Claim {data?.metadata?.name ?? 'NFT'}
+              </Button>
+            </VStack>
           )}
           <Step number={3} active={step === DropStep.Complete}>
             That&apos;s it!

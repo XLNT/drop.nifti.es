@@ -1,7 +1,6 @@
 import { Grant } from 'common/lib/grant';
 import { Granter, GRANTERS } from 'common/lib/granter';
 
-// TODO: look up publicKey by issuer - some type of dashboard to add public keys, idk
 export function getGranter(issuer: string): Granter {
   if (!GRANTERS[issuer]) {
     throw new Error(`Invalid issuer — '${issuer}' hasn't registered with drop.nifti.es.`);
