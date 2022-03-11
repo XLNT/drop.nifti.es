@@ -29,10 +29,9 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
   if (!isValid) return nope(res, 400, `${args.code} is an invalid code at this time.`);
 
   // here we're happy with the input that's been provided and can send off the transaction
-  // const tx = await executeGrant(grant, args.address);
+  const tx = await executeGrant(grant, args.address);
 
   return yup(res, {
-    hash: '0x0',
-    // hash: tx.hash,
+    hash: tx.hash,
   });
 });
