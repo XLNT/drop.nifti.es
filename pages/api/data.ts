@@ -8,6 +8,14 @@ const fetcher = (url: string) =>
     return data;
   });
 
+async function getMetadata(url: string) {
+  try {
+    return await fetcher(url);
+  } catch (error) {
+    return null;
+  }
+}
+
 export default handler(async function data(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return nope(res, 400, `No ${req.method}. Only GET.`);
@@ -17,7 +25,7 @@ export default handler(async function data(req, res) {
 
   try {
     const { grant, granter, error } = verifyGrantAndGranter(issuer, assetId);
-    const metadata = await fetcher(`https://use.nifti.es/api/${grant.id}`);
+    const metadata = await getMetadata(`https://use.nifti.es/api/${grant.id}`);
 
     res.setHeader('Cache-Control', `s-maxage=${60 * 60}`);
 
