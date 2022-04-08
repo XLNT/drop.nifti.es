@@ -8,8 +8,8 @@ const WEIGHTS = {
   [matt.ids[0]]: 1,
   [matt.ids[1]]: 2,
   [matt.ids[2]]: 3,
-  [matt.ids[3]]: 4,
-  [matt.ids[4]]: 5,
+  [matt.ids[3]]: 3,
+  [matt.ids[4]]: 3,
 };
 
 export default function Matt() {
