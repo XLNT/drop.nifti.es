@@ -1,6 +1,7 @@
 import { Button, Divider, Text, VStack } from '@chakra-ui/react';
 import type { NftMetadata } from '@zoralabs/nft-metadata';
 import { AssetId } from 'caip';
+import { CodeInput } from 'client/components/CodeInput';
 import { DropLayout } from 'client/components/DropLayout';
 import { RenderNifty } from 'client/components/RenderNifty';
 import { Step } from 'client/components/Step';
@@ -10,15 +11,10 @@ import { Grant } from 'common/lib/grant';
 import { Granter } from 'common/lib/granter';
 import { useRouter } from 'next/dist/client/router';
 import Script from 'next/script';
-import { useCallback, useMemo, useReducer } from 'react';
-import AuthCode from 'react-auth-code-input';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import Web3Modal from 'web3modal';
-
-import authStyles from '../../client/components/auth.module.css';
-
-const CODE_LENGTH = 6;
 
 interface DropPageData {
   grant: Grant;
@@ -114,6 +110,11 @@ export default function Drop() {
 
   const step = hash ? DropStep.Complete : code ? DropStep.ConnectWallet : DropStep.Claim;
 
+  // 1-way glue query param to state ¯\_(ツ)_/¯
+  useEffect(() => {
+    if (initialCode) setCode(initialCode);
+  }, [initialCode, setCode]);
+
   const connectAccount = useCallback(async () => {
     startLoading();
     try {
@@ -187,19 +188,7 @@ export default function Drop() {
           </Step>
           {step === DropStep.Claim && (
             <VStack spacing={4}>
-              <AuthCode
-                length={CODE_LENGTH}
-                onChange={(value) => {
-                  if (value?.length === CODE_LENGTH) {
-                    setCode(value);
-                  } else {
-                    setCode(undefined);
-                  }
-                }}
-                allowedCharacters="numeric"
-                containerClassName={authStyles.container}
-                inputClassName={authStyles.input}
-              />
+              <CodeInput setCode={setCode} />
             </VStack>
           )}
           <Step

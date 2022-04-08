@@ -18,6 +18,7 @@
     "caip": "^1.0.0",
     "defender-relay-client": "^1.18.0",
     "ethers": "^5.6.0",
+    "faunadb": "^4.5.4",
     "framer-motion": "^6.2.8",
     "next": "^12.1.0",
     "next-compose-plugins": "^2.2.1",
