@@ -1,14 +1,18 @@
 .container {
   padding: 1px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
 .input {
   width: 2ch;
-  padding: 8px;
+  padding: 0.25rem;
   border-radius: 8px;
-  font-size: 40px;
+  font-size: 2rem;
   text-align: center;
-  margin-right: 12px;
   border: 1px solid white;
   text-transform: uppercase;
 }

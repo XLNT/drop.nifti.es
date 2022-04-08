@@ -70,6 +70,7 @@ enum DropStep {
 export default function Drop() {
   const router = useRouter();
   const issuer = router.query.issuer as string;
+  const initialCode = router.query.code as string;
   const assetId = ((router.query.assetId as string[]) ?? []).join('/');
 
   const {
@@ -92,7 +93,7 @@ export default function Drop() {
   const [{ address, hash, code, loading: dropLoading, error: dropError }, dispatch] = useReducer(
     reducer,
     undefined,
-    () => ({ loading: false }),
+    () => ({ loading: false, code: initialCode }),
   );
 
   const connectIsDisabled = !data || pageLoading || !!pageError;
@@ -111,7 +112,7 @@ export default function Drop() {
   const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
   const reset = useCallback(async () => dispatch({ type: 'reset' }), []);
 
-  const step = hash ? DropStep.Complete : address ? DropStep.Claim : DropStep.ConnectWallet;
+  const step = hash ? DropStep.Complete : code ? DropStep.ConnectWallet : DropStep.Claim;
 
   const connectAccount = useCallback(async () => {
     startLoading();
@@ -173,24 +174,16 @@ export default function Drop() {
           <Step
             number={1}
             secondary={
-              address && (
+              code && (
                 <Text fontSize="xs" fontFamily="mono" isTruncated>
-                  {address}
+                  {code}
                 </Text>
               )
             }
-            active={step === DropStep.ConnectWallet}
-            onClick={step !== DropStep.ConnectWallet ? reset : undefined}
+            active={step === DropStep.Claim}
+            onClick={step !== DropStep.Claim ? reset : undefined}
           >
-            Download or connect an Ethereum wallet.
-          </Step>
-          {step === DropStep.ConnectWallet && (
-            <Button onClick={connectAccount} width="full" isDisabled={connectIsDisabled}>
-              Connect Wallet
-            </Button>
-          )}
-          <Step number={2} active={step === DropStep.Claim}>
-            Claim {data?.metadata?.name ?? 'NFT'}
+            Enter Code
           </Step>
           {step === DropStep.Claim && (
             <VStack spacing={4}>
@@ -207,6 +200,24 @@ export default function Drop() {
                 containerClassName={authStyles.container}
                 inputClassName={authStyles.input}
               />
+            </VStack>
+          )}
+          <Step
+            number={2}
+            secondary={
+              address && (
+                <Text fontSize="xs" fontFamily="mono" isTruncated>
+                  {address}
+                </Text>
+              )
+            }
+            active={step === DropStep.ConnectWallet}
+            onClick={step !== DropStep.ConnectWallet ? reset : undefined}
+          >
+            Connect an Ethereum wallet.
+          </Step>
+          {step === DropStep.ConnectWallet &&
+            (address ? (
               <Button
                 onClick={handleDrop}
                 isLoading={loading}
@@ -215,8 +226,11 @@ export default function Drop() {
               >
                 Claim {data?.metadata?.name ?? 'NFT'}
               </Button>
-            </VStack>
-          )}
+            ) : (
+              <Button onClick={connectAccount} width="full" isDisabled={connectIsDisabled}>
+                Connect Wallet
+              </Button>
+            ))}
           <Step number={3} active={step === DropStep.Complete}>
             That&apos;s it!
           </Step>
