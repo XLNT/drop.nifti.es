@@ -38,8 +38,8 @@ function Dashboard() {
       <Button onClick={handleNewCode} disabled={!code}>
         Persist Code
       </Button>
-      {loading && 'loading'}
-      {data && 'persisted'}
+      {loading && <Text>loading...</Text>}
+      {data && <Text>persisted!</Text>}
       {error && <Text>{error.message}</Text>}
     </VStack>
   );
