@@ -108,7 +108,7 @@ export default function Drop() {
   const setError = useCallback((error: Error) => dispatch({ type: 'setError', error }), []);
   const reset = useCallback(async () => dispatch({ type: 'reset' }), []);
 
-  const step = hash ? DropStep.Complete : code ? DropStep.ConnectWallet : DropStep.Claim;
+  const step = hash ? DropStep.Complete : address ? DropStep.Claim : DropStep.ConnectWallet;
 
   // 1-way glue query param to state ¯\_(ツ)_/¯
   useEffect(() => {
@@ -175,25 +175,6 @@ export default function Drop() {
           <Step
             number={1}
             secondary={
-              code && (
-                <Text fontSize="xs" fontFamily="mono" isTruncated>
-                  {code}
-                </Text>
-              )
-            }
-            active={step === DropStep.Claim}
-            onClick={step !== DropStep.Claim ? reset : undefined}
-          >
-            Enter Code
-          </Step>
-          {step === DropStep.Claim && (
-            <VStack spacing={4}>
-              <CodeInput setCode={setCode} />
-            </VStack>
-          )}
-          <Step
-            number={2}
-            secondary={
               address && (
                 <Text fontSize="xs" fontFamily="mono" isTruncated>
                   {address}
@@ -203,10 +184,30 @@ export default function Drop() {
             active={step === DropStep.ConnectWallet}
             onClick={step !== DropStep.ConnectWallet ? reset : undefined}
           >
-            Connect an Ethereum wallet.
+            Connect an ETH wallet!
           </Step>
-          {step === DropStep.ConnectWallet &&
-            (address ? (
+          {step === DropStep.ConnectWallet && (
+            <Button onClick={connectAccount} width="full" isDisabled={connectIsDisabled}>
+              Connect Wallet
+            </Button>
+          )}
+          <Step
+            number={2}
+            secondary={
+              code && (
+                <Text fontSize="xs" fontFamily="mono" isTruncated>
+                  {code}
+                </Text>
+              )
+            }
+            active={step === DropStep.Claim}
+            onClick={step !== DropStep.Claim ? reset : undefined}
+          >
+            Enter a code!
+          </Step>
+          {step === DropStep.Claim && (
+            <VStack spacing={4}>
+              <CodeInput setCode={setCode} />
               <Button
                 onClick={handleDrop}
                 isLoading={loading}
@@ -215,11 +216,8 @@ export default function Drop() {
               >
                 Claim {data?.metadata?.name ?? 'NFT'}
               </Button>
-            ) : (
-              <Button onClick={connectAccount} width="full" isDisabled={connectIsDisabled}>
-                Connect Wallet
-              </Button>
-            ))}
+            </VStack>
+          )}
           <Step number={3} active={step === DropStep.Complete}>
             That&apos;s it!
           </Step>

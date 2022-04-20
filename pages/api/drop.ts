@@ -46,7 +46,5 @@ export default handler(async function drop(req: NextApiRequest, res: NextApiResp
   // here we're happy with the input that's been provided and can send off the transaction
   const tx = await executeGrant(grant, args.address);
 
-  return yup(res, {
-    hash: tx.hash,
-  });
+  return yup(res, { hash: tx.hash });
 });
