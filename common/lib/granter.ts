@@ -33,7 +33,7 @@ export const GRANTERS: Record<string, Granter> = {
   toby: {
     issuer: 'toby',
     secret: process.env.TOBY_SECRET,
-    ids: ['eip155:137/eip721:0x67DFE7A5beEaD6225b68C9A80e8971ad56CDfB60/0'],
+    ids: ['eip155:137/eip721:0x67DFE7A5beEaD6225b68C9A80e8971ad56CDfB60/23'],
     prefix: '🐕️',
     name: 'Toby the Cow Dog',
     url: 'https://opensea.io/collection/tobythecowdog',
