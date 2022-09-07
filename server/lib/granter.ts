@@ -23,7 +23,7 @@ export function getGrantForGranter(granter: Granter, id: string): Grant {
   }
 
   if (granter.issuer === 'toby') {
-    return { id, uri: 'ipfs://QmZPqS2u4TkDHvGhTLMGnaHghVjMjnsAWgpUCkEDCkTNTx' };
+    return { id, uri: 'ipfs://QmTF389gR8DquJGcv8vcyS6qo1zYCu2nHMDCLqm3rgBGdD' };
   }
 
   return { id };
