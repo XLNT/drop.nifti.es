@@ -27,11 +27,15 @@ function getCredentials(chainId: string) {
   }
 }
 
+export function getSigner(chainId: string) {
+  const credentials = getCredentials(chainId);
+  const provider = new DefenderRelayProvider(credentials);
+  return new DefenderRelaySigner(credentials, provider, { speed: 'fast' });
+}
+
 export async function executeGrant(grant: Grant, to: string) {
   const assetId = new AssetId(grant.id);
-  const credentials = getCredentials(assetId.chainId.reference);
-  const provider = new DefenderRelayProvider(credentials);
-  const signer = new DefenderRelaySigner(credentials, provider, { speed: 'fast' });
+  const signer = getSigner(assetId.chainId.reference);
   const contract = getContract(assetId.assetName.reference, signer);
 
   console.log(assetId.chainId.reference, to, grant.uri, contract.address);
